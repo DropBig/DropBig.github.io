@@ -96,6 +96,9 @@ button:disabled{opacity:.5;cursor:default}
   .step-label{font-size:10px}
   .file-info{padding:8px}
 }
+
+/* ドロップヒント */
+.drop-hint{display:block;margin-top:8px;color:var(--sub);font-size:9px;opacity:0.7}
 </style>
 </head>
 <body>
@@ -108,11 +111,12 @@ button:disabled{opacity:.5;cursor:default}
   <!-- 送信画面 -->
   <section id="sendView">
     <div id="setupView">
-      <div id="drop" role="group" aria-label="ファイルのドロップ領域">
+      <div id="drop" role="group" aria-label="File drop area">
         <svg class="cloud" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z"/></svg>
-        <b>ファイルをここにドロップ</b>
-        <span>またはファイルを選択</span>
-        <button type="button" id="pick">ファイルを選択</button>
+        <b>Drop your file here</b>
+        <span>or click to browse from your device</span>
+        <button type="button" id="pick">Select File</button>
+        <small class="drop-hint">Support for videos, images, documents, and more</small>
       </div>
       <input type="file" id="file" class="hidden">
 
