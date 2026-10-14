@@ -99,13 +99,36 @@ button:disabled{opacity:.5;cursor:default}
 
 /* ドロップヒント */
 .drop-hint{display:block;margin-top:10px;color:var(--sub);font-size:10px;opacity:0.7}
+
+/* ヒーローヘッダー */
+.top{text-align:center;margin-bottom:24px;padding:20px 0 8px}
+h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gradient(135deg,#fff 0%,#a8b8ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.lead{color:#d2d5dc;font-size:16px;line-height:22px;margin:8px 0 0;font-weight:500}
+.sub-lead{color:var(--sub);font-size:12px;line-height:18px;margin:6px auto 0;max-width:480px}
+
+/* 特徴セクション */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px;padding-top:20px;border-top:1px solid var(--line)}
+.feature-card{text-align:center;padding:16px 12px;background:rgba(107,124,240,.05);border:1px solid var(--line);border-radius:10px;transition:.15s}
+.feature-card:hover{background:rgba(107,124,240,.1);border-color:var(--accent2)}
+.feature-icon{width:32px;height:32px;margin:0 auto 10px;color:var(--icon)}
+.feature-icon svg{width:100%;height:100%}
+.feature-card h3{font-size:13px;font-weight:600;margin:0 0 6px;color:var(--text)}
+.feature-card p{font-size:10px;line-height:15px;color:var(--sub);margin:0}
+
+@media (max-width:520px){
+  .features{grid-template-columns:1fr;gap:8px}
+  .feature-card{padding:12px}
+  h1{font-size:22px}
+  .lead{font-size:14px}
+}
 </style>
 </head>
 <body>
 <main>
   <header class="top">
     <h1>DropBig</h1>
-    <p class="lead">登録不要のP2Pファイル転送</p>
+    <p class="lead">Share Large Files Instantly</p>
+    <p class="sub-lead">Upload videos, files, or folders and get a shareable link that enables direct downloads. No limits, no hassle.</p>
   </header>
 
   <!-- 送信画面 -->
@@ -135,6 +158,31 @@ button:disabled{opacity:.5;cursor:default}
       <section class="safe" id="safe">
         <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>転送方式について</h2>
         <p>ファイルをサーバーに保存せず、対応するブラウザ間で直接転送します。接続の確立には外部サービスを使用します。</p>
+      </section>
+
+      <!-- 特徴セクション -->
+      <section class="features">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z"/></svg>
+          </div>
+          <h3>Easy Upload</h3>
+          <p>Drag and drop or click to upload any file type</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          </div>
+          <h3>Instant Sharing</h3>
+          <p>Get a shareable link immediately after upload</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <h3>Secure & Fast</h3>
+          <p>Your files are stored securely with fast download speeds</p>
+        </div>
       </section>
     </div>
 
