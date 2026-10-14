@@ -1,0 +1,33 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# エディタ・IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 依存関係・ビルド成果物(今後Node等を使う場合)
+node_modules/
+dist/
+build/
+.cache/
+
+# 環境変数・秘密情報(TURNサーバーの認証情報など)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ログ・一時ファイル
+*.log
+npm-debug.log*
+*.tmp
+tmp/
+
+# テスト用に置いた転送ファイル
+test-files/
