@@ -7,94 +7,94 @@
 <meta name="theme-color" content="#000000">
 <title>DropBig - 登録不要のP2Pファイル転送</title>
 <style>
-:root{color-scheme:dark;--bg:#000;--text:#f5f6f8;--sub:#b3b7c2;--line:#262626;--accent:#3b6ef5;--accent2:#6b7cf0;--icon:#6f8cff;--ok:#32d583;--err:#f97066}
+:root{color-scheme:dark;--bg:#000;--text:#f5f6f8;--sub:#b3b7c2;--line:#262626;--accent:#3b6ef5;--accent2:#6b7cf0;--icon:#6f8cff;--ok:#32d583;--err:#f97066;--scale:0.78}
 *{box-sizing:border-box;forced-color-adjust:none}
-body{margin:0;font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:8px}
-main{width:100%;max-width:960px;border:1px solid var(--line);border-radius:14px;padding:24px 22px 36px;background:var(--bg)}
+body{margin:0;font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:6px;font-size:13px}
+main{width:100%;max-width:720px;border:1px solid var(--line);border-radius:10px;padding:16px 16px 24px;background:var(--bg)}
 .top{text-align:center;margin-bottom:19px}
-h1{font-size:23px;font-weight:500;line-height:30px;margin:0}
-.lead{color:#d2d5dc;font-size:16px;line-height:24px;margin:7px 0 0}
+h1{font-size:17px;font-weight:500;line-height:22px;margin:0}
+.lead{color:#d2d5dc;font-size:12px;line-height:18px;margin:5px 0 0}
 svg{display:block}
-#drop{border:2px dashed var(--accent2);border-radius:14px;padding:26px 16px 26px;text-align:center;background:transparent;transition:.15s}
+#drop{border:2px dashed var(--accent2);border-radius:10px;padding:16px 12px 16px;text-align:center;background:transparent;transition:.15s}
 #drop.over{background:rgba(107,124,240,.1)}
 #drop:focus-visible,button:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-#drop .cloud{width:34px;height:34px;margin:0 auto 22px;color:var(--icon)}
-#drop b{display:block;font-size:15px;line-height:24px;font-weight:700}
-#drop span{display:block;color:#d2d5dc;font-size:14.5px;line-height:22px;margin:12px 0 12px}
-#pick{padding:14px 20px;font-size:16px;line-height:24px;min-width:154px}
-.settings{margin-top:24px}
-.settings h2,.safe h2{font-size:18px;line-height:24px;font-weight:700;margin:0}
-.srow{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:70px}
+#drop .cloud{width:24px;height:24px;margin:0 auto 12px;color:var(--icon)}
+#drop b{display:block;font-size:12px;line-height:18px;font-weight:700}
+#drop span{display:block;color:#d2d5dc;font-size:11px;line-height:16px;margin:8px 0 8px}
+#pick{padding:8px 14px;font-size:12px;line-height:16px;min-width:110px}
+.settings{margin-top:16px}
+.settings h2,.safe h2{font-size:13px;line-height:18px;font-weight:700;margin:0}
+.srow{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:44px}
 .srow+.srow{border-top:1px solid var(--line)}
-.srow:nth-of-type(1){min-height:67px}
-.srow:nth-of-type(2){min-height:73px}
-.srow label{color:var(--sub);font-size:17px}
-select{font:inherit;font-size:18px;color:var(--text);background-color:transparent;border:0;border-radius:8px;padding:8px 24px 8px 8px;text-align:right;text-align-last:right;cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23d5d8e0' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 4px center;background-size:14px}
+.srow:nth-of-type(1){min-height:42px}
+.srow:nth-of-type(2){min-height:46px}
+.srow label{color:var(--sub);font-size:12px}
+select{font:inherit;font-size:12px;color:var(--text);background-color:transparent;border:0;border-radius:6px;padding:5px 18px 5px 5px;text-align:right;text-align-last:right;cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23d5d8e0' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 3px center;background-size:10px}
 select option{background:#111;color:#fff}
-.safe{margin-top:6px;padding:16px 16px 0}
-.safe h2{display:flex;align-items:center;gap:10px}
-.safe h2 svg{width:20px;height:20px;flex:none}
-.safe p{margin:10px 0 0;color:#c4c8d0;font-size:15px;line-height:22px}
+.safe{margin-top:4px;padding:10px 10px 0}
+.safe h2{display:flex;align-items:center;gap:6px}
+.safe h2 svg{width:14px;height:14px;flex:none}
+.safe p{margin:6px 0 0;color:#c4c8d0;font-size:11px;line-height:16px}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-input[type=text]{font:inherit;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:#0b0b0b;color:var(--text)}
+input[type=text]{font:inherit;padding:5px 8px;border-radius:6px;border:1px solid var(--line);background:#0b0b0b;color:var(--text);font-size:11px}
 input.url{flex:1;min-width:0;width:100%}
-button{font:inherit;border:0;border-radius:10px;padding:10px 16px;background:var(--accent);color:#fff;cursor:pointer;font-weight:700}
+button{font:inherit;border:0;border-radius:7px;padding:6px 12px;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;font-size:12px}
 button.sec{background:transparent;color:var(--icon);border:1px solid var(--line)}
 button:disabled{opacity:.5;cursor:default}
 .card{padding:0;margin:0}
-.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden;margin:10px 0 6px}
+.bar{height:6px;background:var(--line);border-radius:4px;overflow:hidden;margin:6px 0 4px}
 .bar>i{display:block;height:100%;width:0;background:var(--accent);transition:width .1s}
-.small{font-size:13px;color:var(--sub)}
+.small{font-size:10px;color:var(--sub)}
 .ok{color:var(--ok)}.err{color:var(--err)}
 .hidden{display:none}
-#qr{display:flex;justify-content:center;margin:14px 0 4px}
-#qr img,#qr canvas{background:#fff;padding:8px;border-radius:8px}
-.fname{font-weight:700;word-break:break-all}
-.head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:4px}
-@media (max-width:520px){main{padding:20px 16px 18px}.safe{padding:16px 4px 0}}
+#qr{display:flex;justify-content:center;margin:10px 0 3px}
+#qr img,#qr canvas{background:#fff;padding:5px;border-radius:5px}
+.fname{font-weight:700;word-break:break-all;font-size:12px}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:3px}
+@media (max-width:520px){main{padding:12px 10px 14px}.safe{padding:10px 2px 0}}
 
 /* 受信画面 - ステップ表示 */
-.steps{display:flex;flex-direction:column;gap:0;margin-bottom:20px}
-.step{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.steps{display:flex;flex-direction:column;gap:0;margin-bottom:12px}
+.step{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
 .step:last-child{border-bottom:none}
-.step-icon{width:24px;height:24px;border-radius:50%;flex:none;position:relative}
+.step-icon{width:16px;height:16px;border-radius:50%;flex:none;position:relative}
 .step-icon.waiting{background:var(--line)}
 .step-icon.active{background:var(--accent);animation:pulse 1.5s ease-in-out infinite}
 .step-icon.done{background:var(--ok)}
 .step-icon.error{background:var(--err)}
-.step-icon.waiting::after{content:'';position:absolute;inset:8px;background:var(--sub);border-radius:50%}
-.step-icon.active::after{content:'';position:absolute;inset:8px;background:#fff;border-radius:50%}
-.step-icon.done::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700}
-.step-icon.error::after{content:'✕';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700}
+.step-icon.waiting::after{content:'';position:absolute;inset:5px;background:var(--sub);border-radius:50%}
+.step-icon.active::after{content:'';position:absolute;inset:5px;background:#fff;border-radius:50%}
+.step-icon.done::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700}
+.step-icon.error::after{content:'✕';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:8px;font-weight:700}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
-.step-label{color:var(--sub);font-size:15px}
+.step-label{color:var(--sub);font-size:11px}
 .step.active .step-label{color:var(--text);font-weight:600}
 .step.done .step-label{color:var(--ok)}
 .step.error .step-label{color:var(--err)}
 
 /* ファイル情報 */
-.file-info{display:flex;align-items:center;gap:14px;padding:16px;background:rgba(107,124,240,.08);border:1px solid var(--line);border-radius:12px;margin-bottom:16px}
-.file-icon{width:40px;height:40px;color:var(--icon);flex:none}
+.file-info{display:flex;align-items:center;gap:10px;padding:10px;background:rgba(107,124,240,.08);border:1px solid var(--line);border-radius:8px;margin-bottom:10px}
+.file-icon{width:26px;height:26px;color:var(--icon);flex:none}
 .file-icon svg{width:100%;height:100%}
 .file-details{min-width:0}
-.file-details .fname{font-size:16px;margin-bottom:4px}
+.file-details .fname{font-size:12px;margin-bottom:2px}
 
 /* 進捗 */
-.progress-area{margin-bottom:16px}
-.progress-text{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.progress-area{margin-bottom:10px}
+.progress-text{display:flex;justify-content:space-between;align-items:center;margin-top:5px}
 
 /* 状態メッセージ */
-.status-msg{padding:12px 0;color:var(--sub)}
+.status-msg{padding:8px 0;color:var(--sub)}
 .status-msg:empty{display:none}
 
 /* アクションエリア */
-.action-area{margin-top:16px}
+.action-area{margin-top:10px}
 .action-area:empty{display:none}
-#dl{width:100%;padding:14px 20px;font-size:16px}
+#dl{width:100%;padding:8px 14px;font-size:12px}
 
 @media (max-width:520px){
-  .step-label{font-size:14px}
-  .file-info{padding:12px}
+  .step-label{font-size:10px}
+  .file-info{padding:8px}
 }
 </style>
 </head>
@@ -305,7 +305,7 @@ async function startShare(file) {
       const url = location.origin + location.pathname + '#' + id + '.' + rawKey;
       $('link').value = url;
       $('qr').innerHTML = '';
-      try { new QRCode($('qr'), {text: url, width: 160, height: 160}); } catch(e){}
+      try { new QRCode($('qr'), {text: url, width: 110, height: 110}); } catch(e){}
       $('sStat').textContent = '相手の接続を待っています…';
       const mins = ttlMins;
       const endAt = Date.now() + mins * 60000;
