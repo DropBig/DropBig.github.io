@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ドロップ転送 - 登録不要のP2Pファイル転送</title>
+<title>DropBig - 登録不要のP2Pファイル転送</title>
 <style>
 :root{--bg:#f5f7fb;--card:#fff;--text:#1c2430;--sub:#667085;--line:#d9dfe9;--accent:#2f6bff;--ok:#12a150;--err:#d92d20}
 @media (prefers-color-scheme:dark){:root{--bg:#10141c;--card:#1a202c;--text:#e8ecf4;--sub:#98a2b3;--line:#2c3547;--accent:#5b8cff;--ok:#32d583;--err:#f97066}}
@@ -13,13 +13,15 @@ main{width:100%;max-width:560px}
 h1{font-size:22px;margin:8px 0 4px}
 .lead{color:var(--sub);font-size:14px;margin:0 0 20px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:16px}
-#drop{border:2px dashed var(--line);border-radius:14px;padding:44px 16px;text-align:center;cursor:pointer;transition:.15s}
+#drop{border:2px dashed var(--accent);border-radius:14px;padding:32px 16px 28px;text-align:center;background:rgba(47,107,255,.04);transition:.15s}
+#drop:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 #drop.over{border-color:var(--accent);background:rgba(47,107,255,.07)}
-#drop b{display:block;font-size:17px;margin-bottom:6px}
-#drop span{color:var(--sub);font-size:13px}
+#drop .icon{font-size:34px;line-height:1;margin-bottom:8px}
+#drop b{display:block;font-size:17px}
+#drop span{display:block;color:var(--sub);font-size:13px;margin:8px 0 12px}
+#pick{padding:12px 28px;font-size:16px}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.opts{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;margin-top:14px;color:var(--sub)}
-select,input[type=text]{font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--text)}
+input[type=text]{font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--text)}
 input.url{flex:1;min-width:0;width:100%}
 button{font:inherit;border:0;border-radius:10px;padding:10px 16px;background:var(--accent);color:#fff;cursor:pointer;font-weight:600}
 button.sec{background:transparent;color:var(--accent);border:1px solid var(--line)}
@@ -29,40 +31,123 @@ button:disabled{opacity:.5;cursor:default}
 .small{font-size:13px;color:var(--sub)}
 .ok{color:var(--ok)}.err{color:var(--err)}
 .hidden{display:none}
+.card h2{font-size:15px;margin:0 0 14px}
+.setting+.setting{margin-top:16px}
+.setting-label{font-size:14px;font-weight:700;margin-bottom:8px}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg label{position:relative;flex:1 1 0;min-width:84px}
+.seg input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+.seg span{display:block;text-align:center;padding:9px 12px;border:1px solid var(--line);border-radius:10px;font-size:14px;transition:.15s}
+.seg input:checked+span{border-color:var(--accent);background:rgba(47,107,255,.1);color:var(--accent);font-weight:700}
+.seg input:focus-visible+span{outline:3px solid var(--accent);outline-offset:2px}
+.hint{font-size:12px;color:var(--sub);margin-top:6px}
+.how{font-size:13px;color:var(--sub);line-height:1.7;margin:0 0 10px}
 #qr{display:flex;justify-content:center;margin:14px 0 4px}
 #qr img,#qr canvas{background:#fff;padding:8px;border-radius:8px}
 .fname{font-weight:700;word-break:break-all}
+.steps{display:flex;gap:8px;list-style:none;padding:0;margin:0 0 16px;font-size:12px;color:var(--sub)}
+.steps li{flex:1;display:flex;align-items:center;gap:6px;line-height:1.3}
+.steps b{flex:none;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:4px}
+.badge{flex:none;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--line);color:var(--text)}
+.badge::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--sub)}
+.badge.connecting::before,.badge.waiting::before{background:#f79009;animation:pulse 1.2s infinite}
+.badge.ready::before{background:var(--accent)}
+.badge.sending::before{background:var(--accent);animation:pulse .8s infinite}
+.badge.verifying::before{background:#9e77ed;animation:pulse .8s infinite}
+.badge.done{color:var(--ok)}.badge.done::before{background:var(--ok)}
+.badge.failed{color:var(--err)}.badge.failed::before{background:var(--err)}
+.badge.stopped::before{background:var(--sub)}
+@keyframes pulse{50%{opacity:.3}}
+@media (prefers-reduced-motion:reduce){.badge::before{animation:none!important}}
+.safe{font-size:13px;color:var(--sub);line-height:1.7}
+.safe summary{cursor:pointer;font-weight:700;color:var(--text);font-size:14px}
+.safe h3{font-size:13px;margin:12px 0 4px;color:var(--text)}
+.safe ul{margin:0;padding-left:1.2em}
+@media (max-width:420px){.steps{flex-direction:column}}
 footer{font-size:12px;color:var(--sub);line-height:1.7}
 </style>
 </head>
 <body>
 <main>
-  <h1>📦 ドロップ転送</h1>
-  <p class="lead">登録・インストール不要。ファイルを置いてURLを送るだけ。端末間で直接、暗号化して転送します。</p>
+  <h1>📦 DropBig</h1>
+  <p class="lead">登録・インストール不要。ファイルを選んで、URLを相手に送るだけ。</p>
+  <ol class="steps" id="steps">
+    <li><b>1</b>ファイルを選ぶ</li>
+    <li><b>2</b>表示されたURLを相手に送る</li>
+    <li><b>3</b>相手が開くと転送が始まる</li>
+  </ol>
 
   <!-- 送信画面 -->
   <section id="sendView">
-    <div class="card" id="pickCard">
-      <div id="drop"><b>ここにファイルをドロップ</b><span>またはタップして選択</span></div>
-      <input type="file" id="file" class="hidden">
-      <div class="opts">
-        <label>有効期限
-          <select id="ttl"><option value="15">15分</option><option value="60">1時間</option><option value="1440">24時間</option></select>
-        </label>
-        <label><input type="checkbox" id="once"> 1回受信したら無効にする</label>
+    <!-- 設定画面(ファイル選択後は共有画面に切り替わる) -->
+    <div id="setupView">
+      <div class="card" id="settingsCard">
+        <h2>共有の設定</h2>
+        <div class="setting" role="radiogroup" aria-labelledby="ttlLabel">
+          <div class="setting-label" id="ttlLabel">有効期限</div>
+          <div class="seg">
+            <label><input type="radio" name="ttl" value="15" checked><span>15分</span></label>
+            <label><input type="radio" name="ttl" value="60"><span>1時間</span></label>
+            <label><input type="radio" name="ttl" value="1440"><span>24時間</span></label>
+          </div>
+          <div class="hint">この時間が過ぎると、URLは使えなくなります。</div>
+        </div>
+        <div class="setting" role="radiogroup" aria-labelledby="cntLabel">
+          <div class="setting-label" id="cntLabel">受信できる回数</div>
+          <div class="seg">
+            <label><input type="radio" name="cnt" value="1"><span>1回だけ</span></label>
+            <label><input type="radio" name="cnt" value="3"><span>3回まで</span></label>
+            <label><input type="radio" name="cnt" value="0" checked><span>何回でも</span></label>
+          </div>
+          <div class="hint">受信が完了した回数で数えます。上限に達すると共有を終了します。</div>
+        </div>
       </div>
+
+      <div class="card" id="pickCard">
+        <h2>ファイルを選ぶ</h2>
+        <div id="drop" role="group" aria-label="ファイルのドロップ領域">
+          <div class="icon" aria-hidden="true">📁</div>
+          <b>ここにファイルをドロップ</b>
+          <span>または</span>
+          <button type="button" id="pick">ファイルを選択</button>
+        </div>
+        <div class="hint" style="text-align:center">選ぶとすぐに、上の設定で共有を開始します。</div>
+        <input type="file" id="file" class="hidden">
+      </div>
+
+      <section class="card safe" id="safe">
+        <h2>通信方式について</h2>
+        <p class="how">ファイルはサーバーに保存されず、ブラウザ同士のP2P通信で届けます。送信前にブラウザ内で暗号化し、復号鍵はURLの「#」以降にだけ含まれます(このサイトのサーバーには送られません)。</p>
+        <details>
+          <summary>安全性の詳細とご注意</summary>
+          <h3>この仕組みで行っていること</h3>
+          <ul>
+            <li>ファイルはブラウザ内でAES-256-GCMにより暗号化してから送信します。チャンクごとに改ざんと順序の検証も行います。</li>
+            <li>復号鍵はURLの「#」以降にのみ含まれ、このサイトのサーバーには送られません。</li>
+            <li>ファイルはサーバーに保存されません。受信側でサイズを検証し、保存できた場合のみ送信側にも「完了」と表示します。</li>
+            <li>有効期限は送信者のタブが開いている間だけ働きます。タブを閉じると共有は終了します。</li>
+          </ul>
+          <h3>ご注意</h3>
+          <ul>
+            <li>URLを知っている人は誰でも受信できます。送信者・受信者の本人確認は行いません。URLは受信者だけに送ってください。</li>
+            <li>接続の仲介にPeerJSの公開サーバーを使います。環境によっては通信が中継サーバーを経由しますが、内容は暗号化されたままです。</li>
+            <li>ページは外部のスクリプト(PeerJS、QRコード)を読み込みます。URLの共有経路や、お使いの端末の安全性までは保証できません。</li>
+            <li>企業内ネットワークなど一部の環境では接続できず、転送できない場合があります。</li>
+          </ul>
+        </details>
+      </section>
     </div>
 
     <div class="card hidden" id="shareCard">
-      <div class="fname" id="sName"></div>
-      <div class="small" id="sSize"></div>
+      <div class="head"><div><div class="fname" id="sName"></div><div class="small" id="sSize"></div><div class="small" id="sOpts"></div></div><span class="badge connecting" id="sBadge">接続中</span></div>
       <div style="margin:14px 0 6px" class="small">この URL を相手に送ってください</div>
-      <div class="row"><input type="text" class="url" id="link" readonly><button id="copy">コピー</button></div>
+      <div class="row"><input type="text" class="url" id="link" readonly aria-label="共有URL"><button id="copy">コピー</button></div>
       <div id="qr"></div>
       <div class="small" id="expire"></div>
       <div class="bar"><i id="sBar"></i></div>
-      <div class="small" id="sStat">相手の接続を待っています…</div>
-      <div class="small" style="margin-top:10px">⚠ 転送が終わるまでこのタブを開いたままにしてください。</div>
+      <div class="small" id="sStat" role="status" aria-live="polite">相手の接続を待っています…</div>
+      <div class="small" style="margin-top:10px">⚠ 完了と表示されるまで、このタブを開いたままにしてください。有効期限もこのタブが開いている間だけ有効です。</div>
       <div style="margin-top:12px"><button class="sec" id="stop">共有をやめる</button></div>
     </div>
   </section>
@@ -70,7 +155,7 @@ footer{font-size:12px;color:var(--sub);line-height:1.7}
   <!-- 受信画面 -->
   <section id="recvView" class="hidden">
     <div class="card">
-      <div class="small" id="rState">送信者に接続しています…</div>
+      <div class="head"><div class="small" id="rState" role="status" aria-live="polite">送信者に接続しています…</div><span class="badge connecting" id="rBadge">接続中</span></div>
       <div class="fname" id="rName" style="margin-top:8px"></div>
       <div class="small" id="rSize"></div>
       <div class="bar"><i id="rBar"></i></div>
@@ -79,12 +164,6 @@ footer{font-size:12px;color:var(--sub);line-height:1.7}
     </div>
   </section>
 
-  <footer>
-    ・ファイルはサーバーに保存されません。送信者のブラウザから受信者のブラウザへ直接送られます。<br>
-    ・内容はAES-256-GCMでブラウザ内で暗号化され、復号鍵はURLの「#」以降にのみ含まれます(サーバーには送られません)。<br>
-    ・URLを送るチャット等が盗み見られると第三者も受信できるため、取り扱いにご注意ください。<br>
-    ・企業内ネットワークなど一部の環境では直接接続できず、転送できない場合があります。
-  </footer>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -94,117 +173,244 @@ footer{font-size:12px;color:var(--sub);line-height:1.7}
 const $ = id => document.getElementById(id);
 const CHUNK = 60 * 1024;
 const MAX_BUFFER = 8 * 1024 * 1024;
+const MAX_MSG_LEN = 20000;          // 制御メッセージの最大長
+const MAX_NAME_LEN = 255;
+const MAX_FILE_SIZE = 2 ** 40;      // 1TB(異常値の拒否用)
+const ACK_TIMEOUT = 60000;
+const MAX_RETRY = 5;
 const enc = new TextEncoder(), dec = new TextDecoder();
+const META_AAD = enc.encode('meta');
 
 const fmtSize = n => n < 1024 ? n + ' B' : n < 1048576 ? (n/1024).toFixed(1) + ' KB' : n < 1073741824 ? (n/1048576).toFixed(1) + ' MB' : (n/1073741824).toFixed(2) + ' GB';
+const fmtEta = s => !isFinite(s) ? '' : s < 60 ? Math.ceil(s) + '秒' : Math.floor(s/60) + '分' + String(Math.ceil(s%60)).padStart(2,'0') + '秒';
 const b64u = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 const unb64u = s => Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')), c => c.charCodeAt(0));
-const randId = () => 'dt-' + Array.from(crypto.getRandomValues(new Uint8Array(10)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join('');
+const randId = () => 'db-' + Array.from(crypto.getRandomValues(new Uint8Array(10)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join('');
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LABEL = {connecting:'接続中', waiting:'接続待ち', ready:'開始待ち', sending:'転送中', verifying:'検証中', done:'完了', failed:'失敗', stopped:'終了'};
+const setBadge = (p, st) => { const b = $(p + 'Badge'); b.textContent = LABEL[st]; b.className = 'badge ' + st; };
+const verr = msg => Object.assign(new Error(msg), {userMsg: msg});
 
-async function encrypt(key, data) {
+// チャンク番号をAADに結び付け、並べ替え・重複・欠落を復号時に検出する
+const chunkAad = i => { const b = new Uint8Array(8); new DataView(b.buffer).setUint32(4, i); return b; };
+
+async function encrypt(key, data, aad) {
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const ct = new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, data));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM', iv, additionalData: aad}, key, data));
   const out = new Uint8Array(12 + ct.length);
   out.set(iv); out.set(ct, 12);
   return out.buffer;
 }
-async function decrypt(key, buf) {
+async function decrypt(key, buf, aad) {
   const u = new Uint8Array(buf);
-  return crypto.subtle.decrypt({name:'AES-GCM', iv: u.slice(0,12)}, key, u.slice(12));
+  if (u.length < 12 + 16) throw new Error('short');
+  return crypto.subtle.decrypt({name:'AES-GCM', iv: u.slice(0,12), additionalData: aad}, key, u.slice(12));
 }
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// 制御メッセージの安全な解析(JSONエラー・型違い・過大データを拒否)
+function parseMsg(d) {
+  if (typeof d !== 'string' || d.length > MAX_MSG_LEN) return null;
+  try {
+    const m = JSON.parse(d);
+    return (m && typeof m === 'object' && typeof m.t === 'string') ? m : null;
+  } catch (e) { return null; }
+}
+const safeName = n => n.replace(/[\\/:*?"<>|\x00-\x1f]/g, '_').slice(0, MAX_NAME_LEN) || 'download';
+
+function progressText(label, done, total, base, t0) {
+  let s = label + ' ' + (total ? Math.floor(done / total * 100) : 100) + '%(' + fmtSize(done) + ' / ' + fmtSize(total) + ')';
+  const sec = (Date.now() - t0) / 1000;
+  if (sec > 1 && done > base) {
+    const rate = (done - base) / sec;
+    s += ' ・ ' + fmtSize(rate) + '/秒';
+    const eta = fmtEta((total - done) / rate);
+    if (eta) s += ' ・ 残り約' + eta;
+  }
+  return s;
+}
 
 /* ================= 送信側 ================= */
-let peer = null, expireTimer = null, countTimer = null, sending = false, curFile = null, curKey = null;
+let peer = null, expireTimer = null, countTimer = null, ackTimer = null;
+let sending = false, starting = false, ended = false, opened = false;
+let curFile = null, curKey = null, activeConn = null;
+let ttlMins = 15, maxRecv = 0, recvDone = 0;   // 共有の設定(ファイル選択時に確定)
 
 const drop = $('drop'), fileInput = $('file');
-drop.onclick = () => fileInput.click();
+$('pick').onclick = () => fileInput.click();
 ['dragenter','dragover'].forEach(e => document.addEventListener(e, ev => { ev.preventDefault(); drop.classList.add('over'); }));
 ['dragleave','drop'].forEach(e => document.addEventListener(e, ev => { ev.preventDefault(); drop.classList.remove('over'); }));
-document.addEventListener('drop', ev => { const f = ev.dataTransfer.files[0]; if (f && !peer && !location.hash) startShare(f); });
+document.addEventListener('drop', ev => {
+  const f = ev.dataTransfer && ev.dataTransfer.files[0];
+  if (f && !peer && !starting && !location.hash) startShare(f);
+});
 fileInput.onchange = () => { if (fileInput.files[0]) startShare(fileInput.files[0]); };
+window.addEventListener('beforeunload', ev => { if (sending) { ev.preventDefault(); ev.returnValue = ''; } });
 
 async function startShare(file) {
-  curFile = file;
-  curKey = await crypto.subtle.generateKey({name:'AES-GCM', length:256}, true, ['encrypt','decrypt']);
-  const rawKey = b64u(await crypto.subtle.exportKey('raw', curKey));
-  const id = randId();
-  $('pickCard').classList.add('hidden');
-  $('shareCard').classList.remove('hidden');
-  $('sName').textContent = file.name;
-  $('sSize').textContent = fmtSize(file.size);
-  $('sStat').textContent = 'サーバーに接続中…';
+  if (starting || peer) return;           // 連打・二重実行の防止
+  starting = true;
+  if (ended) resetSender();
+  try {
+    curFile = file;
+    ttlMins = +document.querySelector('input[name=ttl]:checked').value;
+    maxRecv = +document.querySelector('input[name=cnt]:checked').value;
+    recvDone = 0;
+    curKey = await crypto.subtle.generateKey({name:'AES-GCM', length:256}, true, ['encrypt','decrypt']);
+    const rawKey = b64u(await crypto.subtle.exportKey('raw', curKey));
+    const id = randId();
+    opened = false;
+    $('setupView').classList.add('hidden');
+    $('shareCard').classList.remove('hidden');
+    $('sName').textContent = file.name;
+    $('sSize').textContent = fmtSize(file.size);
+    $('sOpts').textContent = '有効期限 ' + (ttlMins >= 1440 ? '24時間' : ttlMins >= 60 ? '1時間' : ttlMins + '分') + ' ・ 受信 ' + (maxRecv ? maxRecv + '回まで' : '何回でも');
+    $('sBar').style.width = '0';
+    $('sStat').textContent = 'サーバーに接続中…'; setBadge('s','connecting');
 
-  peer = new Peer(id);
-  peer.on('open', () => {
-    const url = location.origin + location.pathname + '#' + id + '.' + rawKey;
-    $('link').value = url;
-    $('qr').innerHTML = '';
-    try { new QRCode($('qr'), {text: url, width: 160, height: 160}); } catch(e){}
-    $('sStat').textContent = '相手の接続を待っています…';
-    const mins = +$('ttl').value;
-    const endAt = Date.now() + mins * 60000;
-    expireTimer = setTimeout(() => stopShare('有効期限が切れました。'), mins * 60000);
-    countTimer = setInterval(() => {
-      const s = Math.max(0, Math.round((endAt - Date.now())/1000));
-      $('expire').textContent = '残り ' + Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
-    }, 500);
-  });
-  peer.on('error', e => { $('sStat').innerHTML = '<span class="err">接続エラー: ' + e.type + '</span>'; });
-  peer.on('connection', conn => onSenderConn(conn));
+    peer = new Peer(id);
+    const myPeer = peer;
+    const connectTimer = setTimeout(() => { if (peer === myPeer && !opened) stopShare('サーバーに接続できませんでした。ネットワークを確認してやり直してください。'); }, 20000);
+    peer.on('open', () => {
+      opened = true; clearTimeout(connectTimer);
+      const url = location.origin + location.pathname + '#' + id + '.' + rawKey;
+      $('link').value = url;
+      $('qr').innerHTML = '';
+      try { new QRCode($('qr'), {text: url, width: 160, height: 160}); } catch(e){}
+      $('sStat').textContent = '相手の接続を待っています…'; setBadge('s','waiting');
+      const mins = ttlMins;
+      const endAt = Date.now() + mins * 60000;
+      expireTimer = setTimeout(() => stopShare('有効期限が切れました。'), mins * 60000);
+      countTimer = setInterval(() => {
+        const s = Math.max(0, Math.round((endAt - Date.now())/1000));
+        $('expire').textContent = '残り ' + Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+      }, 500);
+    });
+    peer.on('disconnected', () => { if (peer === myPeer && !myPeer.destroyed) { try { myPeer.reconnect(); } catch(e){} } });
+    peer.on('error', e => {
+      if (peer !== myPeer) return;
+      if (!opened) { clearTimeout(connectTimer); stopShare('接続エラー: ' + e.type); return; }
+      $('sStat').innerHTML = '<span class="err">接続エラー: ' + esc(e.type) + '</span>'; setBadge('s','failed');
+    });
+    peer.on('connection', conn => onSenderConn(conn));
+  } catch (e) {
+    peer = null;
+    resetSender();
+    alert('共有の準備に失敗しました。もう一度お試しください。');
+  } finally {
+    starting = false;
+  }
 }
 
 function onSenderConn(conn) {
   conn.on('open', async () => {
-    if (sending) { conn.send(JSON.stringify({t:'busy'})); setTimeout(()=>conn.close(),500); return; }
-    $('sStat').textContent = '相手が接続しました。開始を待っています…';
-    const meta = await encrypt(curKey, enc.encode(JSON.stringify({name: curFile.name, size: curFile.size, type: curFile.type})));
-    conn.send(JSON.stringify({t:'meta', d: b64u(meta)}));
+    try {
+      if (sending) { conn.send(JSON.stringify({t:'busy'})); setTimeout(() => conn.close(), 500); return; }
+      if (!curFile || !curKey) return;
+      $('sStat').textContent = '相手が接続しました。相手の操作を待っています…'; setBadge('s','connecting');
+      const meta = await encrypt(curKey, enc.encode(JSON.stringify({name: curFile.name, size: curFile.size, type: curFile.type})), META_AAD);
+      conn.send(JSON.stringify({t:'meta', d: b64u(meta)}));
+    } catch (e) { /* 接続が閉じた場合など。close側で処理 */ }
   });
   conn.on('data', d => {
-    if (typeof d !== 'string') return;
-    const m = JSON.parse(d);
-    if (m.t === 'start') sendFile(conn, m.offset || 0);
+    const m = parseMsg(d);
+    if (!m || !curFile) return;
+    if (m.t === 'start') {
+      const off = m.offset;
+      if (!Number.isSafeInteger(off) || off < 0 || off > curFile.size || off % CHUNK !== 0) {
+        try { conn.send(JSON.stringify({t:'fail', reason:'offset'})); } catch(e){}
+        return;
+      }
+      if (sending) return;
+      sendFile(conn, off);
+    } else if (m.t === 'ack') {
+      if (conn === activeConn && sending) onAck();
+    } else if (m.t === 'fail') {
+      if (conn === activeConn && sending) {
+        clearTimeout(ackTimer); sending = false;
+        $('sStat').innerHTML = '<span class="err">受信側の検証に失敗しました。相手にもう一度開いてもらってください。</span>'; setBadge('s','failed');
+      }
+    }
   });
-  conn.on('close', () => { if (sending) { sending = false; $('sStat').innerHTML = '<span class="err">相手との接続が切れました。相手がページを再読み込みすると続きから再開できます。</span>'; } });
+  conn.on('close', () => {
+    if (conn === activeConn && sending) {
+      clearTimeout(ackTimer); sending = false;
+      $('sStat').innerHTML = '<span class="err">相手との接続が切れました。相手の再接続を待っています(相手のページを開いたままなら自動で再開を試みます)。</span>'; setBadge('s','waiting');
+    }
+  });
+  conn.on('error', () => {});
 }
 
 async function sendFile(conn, offset) {
-  sending = true;
-  const file = curFile, total = file.size;
+  sending = true; activeConn = conn;
+  const file = curFile, key = curKey, total = file.size;
   let pos = offset;
+  const t0 = Date.now(), base = offset;
   try {
     while (pos < total) {
+      if (!conn.open) throw new Error('closed');
       const buf = await file.slice(pos, Math.min(pos + CHUNK, total)).arrayBuffer();
-      const packet = await encrypt(curKey, buf);
+      const packet = await encrypt(key, buf, chunkAad(pos / CHUNK));
       while (conn.dataChannel && conn.dataChannel.bufferedAmount > MAX_BUFFER) {
         await sleep(20);
         if (!conn.open) throw new Error('closed');
       }
+      if (!conn.open) throw new Error('closed');
       conn.send(packet);
       pos += buf.byteLength;
       $('sBar').style.width = (pos / total * 100) + '%';
-      $('sStat').textContent = '送信中… ' + fmtSize(pos) + ' / ' + fmtSize(total);
+      $('sStat').textContent = progressText('送信中', pos, total, base, t0); setBadge('s','sending');
     }
-    conn.send(JSON.stringify({t:'done'}));
-    $('sStat').innerHTML = '<span class="ok">✓ 送信が完了しました</span>';
-    sending = false;
-    if ($('once').checked) setTimeout(() => stopShare('1回の受信が完了したため、共有を終了しました。'), 1500);
+    conn.send(JSON.stringify({t:'done', size: total}));
+    $('sStat').textContent = '送信しました。受信側の検証を待っています…'; setBadge('s','verifying');
+    clearTimeout(ackTimer);
+    ackTimer = setTimeout(() => {
+      if (conn === activeConn && sending) {
+        sending = false;
+        $('sStat').innerHTML = '<span class="err">受信側からの完了確認が届きませんでした。相手の受信状況をご確認ください。</span>'; setBadge('s','failed');
+      }
+    }, ACK_TIMEOUT);
   } catch (e) {
-    sending = false;
+    if (conn === activeConn && sending) {
+      sending = false;
+      if (conn.open) $('sStat').innerHTML = '<span class="err">送信中にエラーが発生しました。ファイルが変更・削除されていないか確認してください。</span>'; setBadge('s','failed');
+    }
+  }
+}
+
+function onAck() {
+  clearTimeout(ackTimer); sending = false;
+  recvDone++;
+  $('sBar').style.width = '100%';
+  $('sStat').innerHTML = '<span class="ok">✓ 受信側での検証・保存が完了しました(受信 ' + recvDone + '回目' + (maxRecv ? ' / 上限 ' + maxRecv + '回' : '') + ')</span>'; setBadge('s','done');
+  if (maxRecv && recvDone >= maxRecv) {
+    const p = peer;
+    setTimeout(() => { if (peer === p) stopShare(maxRecv === 1 ? '1回の受信が完了したため、共有を終了しました。' : '受信回数の上限(' + maxRecv + '回)に達したため、共有を終了しました。'); }, 1500);
   }
 }
 
 function stopShare(msg) {
-  clearTimeout(expireTimer); clearInterval(countTimer);
-  if (peer) { peer.destroy(); peer = null; }
+  clearTimeout(expireTimer); clearTimeout(ackTimer); clearInterval(countTimer);
+  if (peer) { try { peer.destroy(); } catch(e){} peer = null; }
+  sending = false; activeConn = null; opened = false; ended = true;
   $('expire').textContent = '';
-  $('stop').classList.add('hidden');
   $('link').value = '';
   $('qr').innerHTML = '';
-  $('sStat').innerHTML = '<b>' + (msg || '共有を終了しました。') + '</b>';
+  $('sStat').innerHTML = '<b>' + esc(msg || '共有を終了しました。') + '</b>';
+  $('stop').textContent = '新しいファイルを共有';
+  setBadge('s','stopped');
 }
-$('stop').onclick = () => stopShare();
+function resetSender() {
+  ended = false; curFile = null; curKey = null; activeConn = null; recvDone = 0;
+  fileInput.value = '';
+  $('sBar').style.width = '0';
+  $('sStat').textContent = '';
+  $('stop').textContent = '共有をやめる';
+  setBadge('s','connecting');
+  $('shareCard').classList.add('hidden');
+  $('setupView').classList.remove('hidden');
+}
+$('stop').onclick = () => { if (ended) resetSender(); else stopShare(); };
 $('copy').onclick = async () => {
   try { await navigator.clipboard.writeText($('link').value); }
   catch(e){ $('link').select(); document.execCommand('copy'); }
@@ -218,81 +424,154 @@ if (location.hash.length > 5) initReceiver();
 async function initReceiver() {
   $('sendView').classList.add('hidden');
   $('recvView').classList.remove('hidden');
+  $('recvView').appendChild($('safe'));   // 受信画面にも通信方式の説明を表示
   const [pid, keyStr] = location.hash.slice(1).split('.');
-  if (!pid || !keyStr) { $('rState').innerHTML = '<span class="err">URLが正しくありません。</span>'; return; }
+  if (!pid || !keyStr) { $('rState').innerHTML = '<span class="err">URLが正しくありません。</span>'; setBadge('r','failed'); return; }
   let key;
   try { key = await crypto.subtle.importKey('raw', unb64u(keyStr), 'AES-GCM', false, ['decrypt']); }
-  catch(e) { $('rState').innerHTML = '<span class="err">URLの鍵が正しくありません。</span>'; return; }
+  catch(e) { $('rState').innerHTML = '<span class="err">URLの鍵が正しくありません。</span>'; setBadge('r','failed'); return; }
 
-  let meta = null, received = 0, writable = null, chunks = [], chain = Promise.resolve(), finished = false;
+  let meta = null, received = 0, writable = null, chunks = [], chain = Promise.resolve();
+  let finished = false, failed = false, started = false, conn = null, retries = 0;
+  let t0 = 0, base = 0;
+
   const rpeer = new Peer();
-  const timeout = setTimeout(() => { if (!meta) $('rState').innerHTML = '<span class="err">送信者が見つかりません。リンクの期限切れ、または送信者がタブを閉じた可能性があります。</span>'; }, 20000);
+  const timeout = setTimeout(() => { if (!meta) $('rState').innerHTML = '<span class="err">送信者が見つかりません。リンクの期限切れ、または送信者がタブを閉じた可能性があります。ネットワーク環境によっては直接接続できない場合もあります。</span>'; setBadge('r','failed'); }, 20000);
+
+  const fail = msg => {
+    if (failed || finished) return;
+    failed = true;
+    $('rState').innerHTML = '<span class="err">' + esc(msg) + '</span>'; setBadge('r','failed');
+    $('dl').classList.add('hidden');
+    try { if (conn && conn.open) conn.send(JSON.stringify({t:'fail'})); } catch(e){}
+    if (writable) { try { writable.abort(); } catch(e){} writable = null; }
+    chunks = [];
+  };
+
+  function tryReconnect() {
+    if (finished || failed) return;
+    if (retries >= MAX_RETRY) { fail('接続が切れ、再接続できませんでした。このページを再読み込みして、最初からやり直してください。'); return; }
+    retries++;
+    $('rState').textContent = '接続が切れました。再接続しています…(' + retries + '/' + MAX_RETRY + ')'; setBadge('r','connecting');
+    setTimeout(() => { if (!finished && !failed && !rpeer.destroyed) connect(); }, 2000);
+  }
+
+  rpeer.on('disconnected', () => { if (!rpeer.destroyed) { try { rpeer.reconnect(); } catch(e){} } });
   rpeer.on('error', e => {
-    $('rState').innerHTML = '<span class="err">' + (e.type === 'peer-unavailable' ? '送信者が見つかりません(期限切れ、または終了済み)。' : '接続エラー: ' + e.type) + '</span>';
+    if (finished || failed) return;
+    if (started) { tryReconnect(); return; }
+    $('rState').innerHTML = '<span class="err">' + (e.type === 'peer-unavailable' ? '送信者が見つかりません(期限切れ、または終了済み)。' : '接続エラー: ' + esc(e.type)) + '</span>'; setBadge('r','failed');
   });
-  rpeer.on('open', () => {
-    const conn = rpeer.connect(pid, {reliable: true, serialization: 'raw'});
-    conn.on('data', raw => {
-      if (typeof raw === 'string') {
-        const m = JSON.parse(raw);
-        if (m.t === 'meta') {
-          chain = chain.then(async () => {
-            meta = JSON.parse(dec.decode(await decrypt(key, unb64u(m.d))));
-            clearTimeout(timeout);
-            $('rState').textContent = '受信の準備ができました';
-            $('rName').textContent = meta.name;
-            $('rSize').textContent = fmtSize(meta.size);
-            $('dl').classList.remove('hidden');
-          }).catch(() => { $('rState').innerHTML = '<span class="err">復号に失敗しました。URLが途中で切れている可能性があります。</span>'; });
-        } else if (m.t === 'busy') {
-          $('rState').innerHTML = '<span class="err">送信者は別の相手に送信中です。少し待ってからやり直してください。</span>';
-        } else if (m.t === 'done') {
-          chain = chain.then(finish);
-        }
-        return;
-      }
-      const buf = raw instanceof ArrayBuffer ? raw : raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength);
-      chain = chain.then(async () => {
-        const plain = await decrypt(key, buf);
-        received += plain.byteLength;
-        if (writable) await writable.write(plain); else chunks.push(plain);
-        $('rBar').style.width = (received / meta.size * 100) + '%';
-        $('rStat').textContent = '受信中… ' + fmtSize(received) + ' / ' + fmtSize(meta.size);
-      }).catch(() => { $('rState').innerHTML = '<span class="err">データの検証に失敗しました。</span>'; });
-    });
-    conn.on('close', () => { if (!finished && received > 0) $('rState').innerHTML = '<span class="err">接続が切れました。ページを再読み込みすると続きから再開を試みます(保存先は同じファイルを選んでください)。</span>'; });
 
-    $('dl').onclick = async () => {
-      $('dl').disabled = true;
-      if (window.showSaveFilePicker) {
-        try {
-          const h = await window.showSaveFilePicker({suggestedName: meta.name});
-          writable = await h.createWritable();
-        } catch (e) { $('dl').disabled = false; return; }
-      } else if (meta.size > 1.5 * 1024 * 1024 * 1024) {
-        $('rState').innerHTML = '<span class="err">このブラウザでは約1.5GBを超えるファイルは受信できません。PCのChrome/Edgeをお使いください。</span>';
-        return;
-      }
-      $('rState').textContent = '受信中…';
-      conn.send(JSON.stringify({t:'start', offset: 0}));
-    };
+  function startTransfer() {
+    started = true; t0 = Date.now(); base = received;
+    $('rState').textContent = '受信中です。このタブを閉じないでください。'; setBadge('r','sending');
+    conn.send(JSON.stringify({t:'start', offset: received}));
+  }
 
-    async function finish() {
-      finished = true;
-      if (writable) { await writable.close(); }
-      else {
-        const blob = new Blob(chunks, {type: meta.type || 'application/octet-stream'});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob); a.download = meta.name;
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(() => URL.revokeObjectURL(a.href), 60000);
-        chunks = [];
-      }
-      $('rBar').style.width = '100%';
-      $('rState').innerHTML = '<span class="ok">✓ 受信が完了しました</span>';
-      rpeer.destroy();
+  async function onMeta(m) {
+    if (typeof m.d !== 'string' || m.d.length > MAX_MSG_LEN) throw verr('メタデータが不正です。');
+    const info = JSON.parse(dec.decode(await decrypt(key, unb64u(m.d), META_AAD)));
+    if (!info || typeof info.name !== 'string' || info.name.length === 0 || info.name.length > MAX_NAME_LEN ||
+        !Number.isSafeInteger(info.size) || info.size < 0 || info.size > MAX_FILE_SIZE ||
+        (info.type !== undefined && typeof info.type !== 'string')) throw verr('ファイル情報が不正です。');
+    if (!meta) {
+      meta = {name: safeName(info.name), size: info.size, type: info.type || ''};
+      $('rState').textContent = '受信の準備ができました。ボタンを押すと保存先を選んで開始します。'; setBadge('r','ready');
+      $('rName').textContent = meta.name;
+      $('rSize').textContent = fmtSize(meta.size);
+      $('dl').classList.remove('hidden');
+    } else if (meta.size !== info.size) {
+      throw verr('再接続先のファイルが元のファイルと一致しません。');
     }
-  });
+    clearTimeout(timeout);
+    if (started) { retries = 0; startTransfer(); }   // 再接続:受信済み位置から再開
+  }
+
+  async function onChunk(buf) {
+    if (failed || finished) return;
+    const idx = Math.floor(received / CHUNK);
+    const plain = await decrypt(key, buf, chunkAad(idx));
+    if (received + plain.byteLength > meta.size) throw verr('受信データが予定サイズを超えました。');
+    if (writable) await writable.write(plain); else chunks.push(plain);
+    received += plain.byteLength;
+    $('rBar').style.width = (meta.size ? received / meta.size * 100 : 100) + '%';
+    $('rStat').textContent = progressText('受信中', received, meta.size, base, t0);
+  }
+
+  async function finish(m) {
+    if (!meta || !started) throw verr('転送が開始されていません。');
+    if (m.size !== meta.size || received !== meta.size) throw verr('受信サイズが一致しません(' + fmtSize(received) + ' / ' + fmtSize(meta.size) + ')。最初からやり直してください。');
+    setBadge('r','verifying'); $('rState').textContent = '検証・保存しています…';
+    if (writable) { await writable.close(); writable = null; }
+    else {
+      const blob = new Blob(chunks, {type: meta.type || 'application/octet-stream'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = meta.name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+      chunks = [];
+    }
+    finished = true;
+    $('rBar').style.width = '100%';
+    $('rState').innerHTML = '<span class="ok">✓ 受信・検証が完了しました</span>'; setBadge('r','done');
+    try { conn.send(JSON.stringify({t:'ack'})); } catch(e){}
+    setTimeout(() => { try { rpeer.destroy(); } catch(e){} }, 1500);
+  }
+
+  function onData(raw) {
+    if (failed || finished) return;
+    try {
+      if (typeof raw === 'string') {
+        const m = parseMsg(raw);
+        if (!m) return;
+        if (m.t === 'meta') chain = chain.then(() => onMeta(m)).catch(e => fail(e.userMsg || '復号に失敗しました。URLが途中で切れている可能性があります。'));
+        else if (m.t === 'busy') { $('rState').innerHTML = '<span class="err">送信者は別の相手に送信中です。少し待ってからやり直してください。</span>'; setBadge('r','failed'); }
+        else if (m.t === 'fail') fail('送信者側でエラーが発生しました。もう一度やり直してください。');
+        else if (m.t === 'done') chain = chain.then(() => finish(m)).catch(e => fail(e.userMsg || '保存に失敗しました。'));
+        return;
+      }
+      if (!meta || !started) return;
+      let buf;
+      if (raw instanceof ArrayBuffer) buf = raw;
+      else if (ArrayBuffer.isView(raw)) buf = raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength);
+      else return;
+      chain = chain.then(() => onChunk(buf)).catch(e => fail(e.userMsg || 'データの検証に失敗しました。'));
+    } catch (e) {
+      fail('想定外のデータを受信しました。');
+    }
+  }
+
+  function connect() {
+    conn = rpeer.connect(pid, {reliable: true, serialization: 'raw'});
+    const c = conn;
+    c.on('data', onData);
+    c.on('error', () => {});
+    c.on('close', () => {
+      if (c !== conn || finished || failed) return;
+      if (started) tryReconnect();
+      else if (!meta) { $('rState').innerHTML = '<span class="err">送信者との接続が切れました。ページを再読み込みしてください。</span>'; setBadge('r','failed'); }
+    });
+  }
+
+  rpeer.on('open', connect);
+
+  $('dl').onclick = async () => {
+    if (!meta || started) return;
+    $('dl').disabled = true;
+    if (window.showSaveFilePicker) {
+      try {
+        const h = await window.showSaveFilePicker({suggestedName: meta.name});
+        writable = await h.createWritable();
+      } catch (e) { $('dl').disabled = false; return; }
+    } else if (meta.size > 1.5 * 1024 * 1024 * 1024) {
+      $('rState').innerHTML = '<span class="err">このブラウザでは約1.5GBを超えるファイルは受信できません。PCのChrome/Edgeをお使いください。</span>'; setBadge('r','failed');
+      $('dl').disabled = false;
+      return;
+    }
+    try { startTransfer(); }
+    catch (e) { fail('送信者に接続できません。ページを再読み込みしてください。'); }
+  };
 }
 })();
 </script>
