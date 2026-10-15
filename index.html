@@ -116,13 +116,25 @@ button:disabled{opacity:.5;cursor:default}
 .step-icon.done::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700}
 .step-icon.error::after{content:'✕';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
-.step-label{color:var(--sub);font-size:12px}
+.step-body{flex:1;min-width:0}
+.step-sub{margin-top:2px;color:var(--sub);font-size:11px;line-height:16px}
+.step-badge{flex:none;font-size:10px;font-weight:700;padding:3px 10px;border-radius:999px;border:1px solid var(--line);color:var(--sub);white-space:nowrap}
+.step-badge.active{border-color:var(--accent2);color:var(--icon);background:rgba(107,124,240,.12)}
+.step-badge.done{border-color:var(--ok);color:var(--ok);background:rgba(50,213,131,.08)}
+.step-badge.error{border-color:var(--err);color:var(--err);background:rgba(249,112,102,.08)}
+.conn-steps{margin-bottom:16px}
+.step-label{flex:1;color:var(--sub);font-size:12px}
 .step.active .step-label{color:var(--text);font-weight:600}
 .step.done .step-label{color:var(--ok)}
 .step.error .step-label{color:var(--err)}
 
 /* ファイル情報 */
 .file-info{display:flex;align-items:center;gap:12px;padding:12px;background:rgba(107,124,240,.08);border:1px solid var(--line);border-radius:10px;margin-bottom:12px}
+.head-file{margin-bottom:14px;background:transparent}
+.fc-check{flex:none;width:22px;height:22px;color:var(--ok);display:inline-flex}
+.fc-check.hidden{display:none}
+.fc-check>span{display:inline-flex;width:100%;height:100%}
+.fc-check svg{width:100%;height:100%}
 .file-icon{width:30px;height:30px;color:var(--icon);flex:none}
 .file-icon svg{width:100%;height:100%}
 .file-details{min-width:0}
@@ -171,6 +183,56 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
   .lead{font-size:14px}
 }
 
+/* 共有カード: 画面幅に応じた自動レイアウト(721px以上でQRと接続情報を左右に並べる) */
+.share-grid{display:block}
+.share-url-label{margin:14px 0 6px}
+.share-expire{margin-top:4px}
+@media (min-width:721px){
+  .share-grid{display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px;align-items:start;margin-top:6px}
+  .share-qr{width:216px;flex:none}
+  .share-qr #qr img.qr-img{width:100%}
+  .share-expire{text-align:center}
+  .share-url-label{margin:0 0 6px}
+}
+
+/* タッチデバイス・狭い画面: 押しやすいボタンサイズ(44px以上) */
+@media (max-width:720px){
+  main button{min-height:44px}
+  #copy,#stop,#qrClose{padding:12px 20px;font-size:15px}
+  .file-item button{min-height:44px;padding:10px 16px;font-size:13px}
+  select{min-height:44px}
+  #qr img.qr-img{cursor:pointer}
+}
+
+/* 転送進捗の強調表示 */
+.pct{font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;flex:none;min-width:44px;text-align:right}
+#sSizes,#rSizes{margin-top:2px}
+.done-panel{display:flex;align-items:center;gap:10px;margin-top:12px;padding:12px 14px;border:1px solid var(--ok);border-radius:10px;background:rgba(50,213,131,.08);color:var(--ok);font-size:14px;font-weight:600;line-height:1.5}
+.done-panel.hidden{display:none}
+.done-panel svg{width:22px;height:22px;flex:none}
+
+/* 選択ファイルリスト */
+#fileList{margin-top:16px;border:1px solid var(--line);border-radius:10px;padding:12px}
+#fileList.hidden{display:none}
+.fl-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.fl-head span{font-size:13px;font-weight:700;color:var(--text)}
+#clearFiles{padding:6px 12px;font-size:12px}
+#flItems{list-style:none;margin:0 0 12px;padding:0}
+.file-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.file-item:last-child{border-bottom:none}
+.fi-icon{width:20px;height:20px;color:var(--icon);flex:none}
+.fi-icon svg{width:100%;height:100%}
+.fi-info{min-width:0;flex:1}
+.fi-name{display:block;font-size:13px;font-weight:600;word-break:break-all}
+.fi-size{font-size:11px;color:var(--sub)}
+.file-item button{background:transparent;color:var(--err);border:1px solid var(--line);padding:5px 10px;font-size:12px;flex:none;font-weight:700}
+.file-item button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#shareStart{width:100%}
+@media (max-width:520px){
+  .file-item button{padding:8px 14px;font-size:13px}
+  #shareStart{padding:13px 28px;font-size:16px}
+}
+
 /* QR拡大表示(ライトボックス) */
 #qr img.qr-img{cursor:zoom-in}
 #qr img.qr-img:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
@@ -198,9 +260,15 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
         <b>Drop your file here</b>
         <span>or click to browse from your device</span>
         <button type="button" id="pick">Select File</button>
-        <small class="drop-hint">Support for videos, images, documents, and more</small>
+        <small class="drop-hint">Support for videos, images, documents, and more — 複数ファイルもまとめて選択できます</small>
       </div>
-      <input type="file" id="file" class="hidden">
+      <input type="file" id="file" class="hidden" multiple>
+
+      <div id="fileList" class="hidden">
+        <div class="fl-head"><span id="flCount"></span><button type="button" class="sec" id="clearFiles">選び直し</button></div>
+        <ul id="flItems"></ul>
+        <button type="button" id="shareStart">選択したファイルを共有</button>
+      </div>
 
       <section class="settings" aria-labelledby="setTitle">
         <h2 id="setTitle">共有設定</h2>
@@ -250,16 +318,63 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
     </div>
 
     <div class="card hidden" id="shareCard">
-      <div class="head"><div><div class="fname" id="sName"></div><div class="small" id="sSize"></div></div></div>
-      <div style="margin:14px 0 6px" class="small">この URL を相手に送ってください</div>
-      <div class="row"><input type="text" class="url" id="link" readonly aria-label="共有URL"><button id="copy">コピー</button></div>
-      <div id="qr"></div>
-      <div class="small qr-hint hidden" id="qrHint">QRコードをタップすると拡大表示します</div>
-      <div class="small" id="expire"></div>
-      <div class="bar"><i id="sBar"></i></div>
-      <div class="small" id="sStat" role="status" aria-live="polite">相手の接続を待っています…</div>
-      <div class="small" style="margin-top:10px">完了と表示されるまで、このタブを開いたままにしてください。有効期限もこのタブが開いている間だけ有効です。</div>
-      <div class="small" style="margin-top:6px;color:#e0a75e">この URL には復号鍵が含まれています。信頼できる相手のみに送り、公開掲示板等には貼らないでください。</div>
+      <div class="file-info head-file">
+        <div class="file-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg></div>
+        <div class="file-details">
+          <div class="fname" id="sName"></div>
+          <div class="small" id="sSize"></div>
+        </div>
+        <span class="fc-check hidden" id="sCheck" aria-label="転送完了"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg></span></span>
+      </div>
+      <div class="steps conn-steps" id="sSteps" aria-live="polite">
+        <div class="step" id="sst1">
+          <div class="step-icon waiting"></div>
+          <div class="step-body">
+            <div class="step-label">サーバーに接続中…</div>
+            <div class="small step-sub">共有リンクを発行しています。</div>
+          </div>
+          <span class="step-badge" id="ssb1">待機中</span>
+        </div>
+        <div class="step" id="sst2">
+          <div class="step-icon waiting"></div>
+          <div class="step-body">
+            <div class="step-label">相手の接続を待っています</div>
+            <div class="small step-sub">相手がQRコードを読み取ると接続を開始します。</div>
+          </div>
+          <span class="step-badge" id="ssb2">待機中</span>
+        </div>
+        <div class="step" id="sst3">
+          <div class="step-icon waiting"></div>
+          <div class="step-body">
+            <div class="step-label">ファイル転送</div>
+            <div class="small step-sub">相手がダウンロードを開始すると転送します。</div>
+          </div>
+          <span class="step-badge" id="ssb3">待機中</span>
+        </div>
+      </div>
+      <div class="share-grid">
+        <div class="share-qr">
+          <div id="qr"></div>
+          <div class="small qr-hint hidden" id="qrHint">QRコードをタップすると拡大表示します</div>
+          <div class="small share-expire" id="expire"></div>
+        </div>
+        <div class="share-info">
+          <div class="small share-url-label">この URL を相手に送ってください</div>
+          <div class="row"><input type="text" class="url" id="link" readonly aria-label="共有URL"><button id="copy">コピー</button></div>
+          <div class="bar"><i id="sBar"></i></div>
+          <div class="progress-text">
+            <span class="small" id="sStat" role="status" aria-live="polite">相手の接続を待っています…</span>
+            <span class="small pct" id="sPct">0%</span>
+          </div>
+          <div class="small" id="sSizes"></div>
+          <div id="sDone" class="done-panel hidden" role="status">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg>
+            <span id="sDoneMsg"></span>
+          </div>
+          <div class="small" style="margin-top:10px">完了と表示されるまで、このタブを開いたままにしてください。有効期限もこのタブが開いている間だけ有効です。</div>
+          <div class="small" style="margin-top:6px;color:#e0a75e">この URL には復号鍵が含まれています。信頼できる相手のみに送り、公開掲示板等には貼らないでください。</div>
+        </div>
+      </div>
       <div style="margin-top:12px"><button class="sec" id="stop">共有をやめる</button></div>
     </div>
   </section>
@@ -272,14 +387,17 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
         <div class="step" id="step1">
           <div class="step-icon waiting"></div>
           <div class="step-label">送信者に接続中…</div>
+          <span class="step-badge" id="rb1">待機中</span>
         </div>
         <div class="step" id="step2">
           <div class="step-icon waiting"></div>
           <div class="step-label">ファイル情報を検証中…</div>
+          <span class="step-badge" id="rb2">待機中</span>
         </div>
         <div class="step" id="step3">
           <div class="step-icon waiting"></div>
           <div class="step-label">ファイルを受信中…</div>
+          <span class="step-badge" id="rb3">待機中</span>
         </div>
       </div>
 
@@ -292,6 +410,7 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
           <div class="fname" id="rName"></div>
           <div class="small" id="rSize"></div>
         </div>
+        <span class="fc-check hidden" id="rCheck" aria-label="受信完了"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg></span></span>
       </div>
 
       <!-- 進捗バー -->
@@ -299,8 +418,15 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
         <div class="bar"><i id="rBar"></i></div>
         <div class="progress-text">
           <span class="small" id="rStat"></span>
-          <span class="small" id="rEta"></span>
+          <span class="small pct" id="rPct">0%</span>
         </div>
+        <div class="small" id="rSizes"></div>
+      </div>
+
+      <!-- 転送完了通知 -->
+      <div id="rDone" class="done-panel hidden" role="status">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg>
+        <span>ファイルの受信・検証が完了しました。このファイルは正しく保存されています。</span>
       </div>
 
       <!-- 状態メッセージ -->
@@ -506,6 +632,7 @@ const $ = id => document.getElementById(id);
 const MAX_MSG_LEN = 20000;
 const MAX_NAME_LEN = 255;
 const MAX_FILE_SIZE = 2 ** 40;
+const MAX_FILES = 50;               // 一度に共有できるファイル数の上限
 const ACK_TIMEOUT = 60000;
 const CONNECT_TIMEOUT = 20000;
 const META_TIMEOUT = 30000;          // 受信側: メタデータ待機
@@ -523,6 +650,7 @@ const META_AAD = enc.encode('meta');
 
 const fmtSize = n => n < 1024 ? n + ' B' : n < 1048576 ? (n/1024).toFixed(1) + ' KB' : n < 1073741824 ? (n/1048576).toFixed(1) + ' MB' : (n/1073741824).toFixed(2) + ' GB';
 const fmtEta = s => !isFinite(s) ? '' : s < 60 ? Math.ceil(s) + '秒' : Math.floor(s/60) + '分' + String(Math.ceil(s%60)).padStart(2,'0') + '秒';
+const typeLabel = t => !t ? 'ファイル' : t.indexOf('image/') === 0 ? '画像' : t.indexOf('video/') === 0 ? '動画' : t.indexOf('audio/') === 0 ? '音声' : t.indexOf('text/') === 0 ? 'テキスト' : t === 'application/pdf' ? 'PDF' : /zip|compressed/.test(t) ? 'ZIP' : 'ファイル';
 const b64u = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 const unb64u = s => Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')), c => c.charCodeAt(0));
 const randId = () => 'db-' + Array.from(crypto.getRandomValues(new Uint8Array(10)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join('');
@@ -583,22 +711,23 @@ function parseMsg(d) {
 const safeName = n => n.replace(/[\\/:*?"<>|\x00-\x1f]/g, '_').slice(0, MAX_NAME_LEN) || 'download';
 
 /* ---------- 進捗表示(スロットル付き) ---------- */
-function makeProgress(onText){
+function makeProgress(onInfo){
   let last = 0, lastBytes = 0;
   return (label, done, total, base, t0, force) => {
     const now = Date.now();
     // 一定時間経過 または 256KB進捗 のどちらかで更新(巨大ファイルのDOM更新負荷を抑制)
     if (!force && now - last < PROGRESS_MIN_INTERVAL && done - lastBytes < 262144) return;
     last = now; lastBytes = done;
-    let s = label + ' ' + (total ? Math.floor(done / total * 100) : 100) + '%(' + fmtSize(done) + ' / ' + fmtSize(total) + ')';
     const sec = (now - t0) / 1000;
-    if (sec > 1 && done > base) {
-      const rate = (done - base) / sec;
-      s += ' ・ ' + fmtSize(rate) + '/秒';
-      const eta = fmtEta((total - done) / rate);
-      if (eta) s += ' ・ 残り約' + eta;
-    }
-    onText(s);
+    let rate = 0;
+    if (sec > 1 && done > base) rate = (done - base) / sec;
+    onInfo({
+      label: label,
+      percent: total ? Math.floor(done / total * 100) : 100,
+      done: done, total: total,
+      rate: rate,
+      eta: rate > 0 ? (total - done) / rate : Infinity
+    });
   };
 }
 
@@ -617,6 +746,8 @@ let expireTimer = null, countTimer = null, ackTimer = null, claimTimer = null;
 let senderState = 'idle';   // idle | claimed | sending | waitack | finishing | closed
 let flowResolve = null;      // バックプレッシャー: 受信側flow待ちのリゾルバ
 let curFile = null, curKey = null, curSid = null, curChunk = 61440;
+let curFiles = [], curIdx = 0;      // 複数ファイルの転送キュー
+let pendingFiles = [];              // 共有開始前の選択ファイルリスト
 let slotConn = null;         // 受信枠を予約した接続
 let ttlMins = 60, maxRecv = 1, recvDone = 0;
 let starting = false, ended = false, opened = false;
@@ -626,10 +757,41 @@ $('pick').onclick = () => fileInput.click();
 ['dragenter','dragover'].forEach(e => document.addEventListener(e, ev => { ev.preventDefault(); drop.classList.add('over'); }));
 ['dragleave','drop'].forEach(e => document.addEventListener(e, ev => { ev.preventDefault(); drop.classList.remove('over'); }));
 document.addEventListener('drop', ev => {
-  const f = ev.dataTransfer && ev.dataTransfer.files[0];
-  if (f && !peer && !starting && !location.hash) startShare(f);
+  if (peer || starting || location.hash) return;
+  const fs = ev.dataTransfer && ev.dataTransfer.files;
+  if (fs && fs.length) queueFiles(fs);
 });
-fileInput.onchange = () => { if (fileInput.files[0]) startShare(fileInput.files[0]); };
+fileInput.onchange = () => { if (fileInput.files.length) queueFiles(fileInput.files); fileInput.value = ''; };
+
+/* ---------- 選択ファイルリスト(一覧・削除・選び直し) ---------- */
+function queueFiles(fileList) {
+  const arr = Array.from(fileList).filter(f => f && Number.isSafeInteger(f.size) && f.size >= 0);
+  const room = MAX_FILES - pendingFiles.length;
+  if (arr.length > room) alert('一度に共有できるのは ' + MAX_FILES + ' 件までです。超過分は追加されません。');
+  pendingFiles = pendingFiles.concat(arr.slice(0, Math.max(0, room)));
+  renderFileList();
+}
+function renderFileList() {
+  const box = $('fileList'), ul = $('flItems');
+  if (!pendingFiles.length) { box.classList.add('hidden'); return; }
+  box.classList.remove('hidden');
+  $('flCount').textContent = '選択したファイル (' + pendingFiles.length + ' 件)';
+  ul.innerHTML = '';
+  pendingFiles.forEach((f, i) => {
+    const li = document.createElement('li');
+    li.className = 'file-item';
+    li.innerHTML = '<span class="fi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg></span>' +
+      '<span class="fi-info"><span class="fi-name">' + esc(f.name) + '</span><br><span class="fi-size">' + fmtSize(f.size) + '</span></span>' +
+      '<button type="button" data-i="' + i + '" aria-label="' + esc(f.name) + ' を削除">削除</button>';
+    ul.appendChild(li);
+  });
+  ul.querySelectorAll('button').forEach(b => b.onclick = () => {
+    pendingFiles.splice(+b.dataset.i, 1);
+    renderFileList();
+  });
+}
+$('clearFiles').onclick = () => { pendingFiles = []; renderFileList(); };
+$('shareStart').onclick = () => { if (pendingFiles.length && !peer && !starting) startShare(pendingFiles); };
 window.addEventListener('beforeunload', ev => { if (senderState === 'sending' || senderState === 'claimed') { ev.preventDefault(); ev.returnValue = ''; } });
 
 function isSlotBusy(){
@@ -642,18 +804,23 @@ function releaseSlot(){
   if (senderState === 'claimed' || senderState === 'sending') senderState = 'idle';
 }
 
-async function startShare(file) {
+async function startShare(files) {
   if (starting || peer) return;
+  if (!files || !files.length) return;
   starting = true;
   if (ended) resetSender();
   try {
     // 送信開始前のファイルサイズ検証(異常値を早めに拒否)
-    if (!Number.isSafeInteger(file.size) || file.size < 0 || file.size > MAX_FILE_SIZE) {
-      alert('ファイルサイズがサポート範囲を超えています。');
-      starting = false;
-      return;
+    for (const f of files) {
+      if (!Number.isSafeInteger(f.size) || f.size < 0 || f.size > MAX_FILE_SIZE) {
+        alert('「' + (f.name || 'ファイル') + '」のサイズがサポート範囲を超えています。');
+        starting = false;
+        return;
+      }
     }
-    curFile = file;
+    curFiles = files.slice();
+    curIdx = 0;
+    curFile = curFiles[0];
     ttlMins = +$('ttl').value;
     maxRecv = +$('cnt').value;
     curChunk = +$('csz').value;
@@ -665,18 +832,27 @@ async function startShare(file) {
     opened = false; senderState = 'idle';
     $('setupView').classList.add('hidden');
     $('shareCard').classList.remove('hidden');
-    $('sName').textContent = file.name;
-    $('sSize').textContent = fmtSize(file.size);
+    $('sName').textContent = curFileLabel();
+    $('sSize').textContent = fmtSize(curFile.size) + ' · ' + typeLabel(curFile.type);
+    $('sCheck').classList.add('hidden');
     $('sBar').style.width = '0';
+    $('sPct').textContent = '0%';
+    $('sSizes').textContent = '';
+    $('sDone').classList.add('hidden');
     $('sStat').textContent = 'サーバーに接続中…';
+    sStep(1, 'active', 'サーバーに接続中…', '共有リンクを発行しています。');
+    sStep(2, 'wait', '相手の接続を待っています', '相手がQRコードを読み取ると接続を開始します。');
+    sStep(3, 'wait', 'ファイル転送', '相手がダウンロードを開始すると転送します。');
 
     peer = new Peer(id);
     const myPeer = peer;
     const connectTimer = setTimeout(() => {
-      if (peer === myPeer && !opened) stopShare('サーバーに接続できませんでした。ネットワークを確認してやり直してください。');
+      if (peer === myPeer && !opened) { sStep(1, 'error', 'サーバーに接続できませんでした', 'ネットワークを確認してやり直してください。'); stopShare('サーバーに接続できませんでした。ネットワークを確認してやり直してください。'); }
     }, CONNECT_TIMEOUT);
     peer.on('open', () => {
       opened = true; clearTimeout(connectTimer);
+      sStep(1, 'done', 'サーバーに接続しました', '共有リンクを発行しました。');
+      sStep(2, 'active');
       const url = location.origin + location.pathname + '#' + id + '.' + rawKey;
       $('link').value = url;
       renderShareQR(url);
@@ -692,7 +868,7 @@ async function startShare(file) {
     peer.on('disconnected', () => { if (peer === myPeer && !myPeer.destroyed) { try { myPeer.reconnect(); } catch(e){} } });
     peer.on('error', e => {
       if (peer !== myPeer) return;
-      if (!opened) { clearTimeout(connectTimer); stopShare('接続エラーが発生しました。もう一度お試しください。'); return; }
+      if (!opened) { clearTimeout(connectTimer); sStep(1, 'error', '接続エラーが発生しました', 'もう一度お試しください。'); stopShare('接続エラーが発生しました。もう一度お試しください。'); return; }
       $('sStat').innerHTML = '<span class="err">接続エラーが発生しました。</span>';
     });
     peer.on('connection', conn => onSenderConn(conn));
@@ -703,6 +879,41 @@ async function startShare(file) {
   } finally {
     starting = false;
   }
+}
+
+/* 送信側接続ステップ: state = active | wait | done | error */
+function sStep(n, state, title, sub) {
+  const step = $('sst' + n), icon = step.querySelector('.step-icon'), b = $('ssb' + n);
+  step.classList.remove('active', 'done', 'error');
+  icon.classList.remove('active', 'done', 'error', 'waiting');
+  b.className = 'step-badge';
+  if (state === 'done') {
+    step.classList.add('done'); icon.classList.add('done');
+    b.classList.add('done'); b.textContent = '接続済み';
+  } else if (state === 'error') {
+    step.classList.add('error'); icon.classList.add('error');
+    b.classList.add('error'); b.textContent = 'エラー';
+  } else if (state === 'wait') {
+    icon.classList.add('waiting'); b.textContent = '待機中';
+  } else {
+    step.classList.add('active'); icon.classList.add('active');
+    b.classList.add('active'); b.textContent = '接続中';
+  }
+  if (title) step.querySelector('.step-label').textContent = title;
+  if (sub !== undefined) step.querySelector('.step-sub').textContent = sub;
+}
+
+function curFileLabel() {
+  return curFiles.length > 1 ? '(' + (curIdx + 1) + '/' + curFiles.length + ') ' + curFile.name : curFile.name;
+}
+
+async function sendMetaTo(conn) {
+  const meta = await encrypt(curKey, enc.encode(JSON.stringify({
+    name: curFile.name, size: curFile.size, type: curFile.type,
+    chunk: curChunk, sid: curSid
+  })), META_AAD);
+  if (slotConn !== conn || !conn.open) return;   // 送信途中に予約が変わっていたら中止
+  conn.send(JSON.stringify({t:'meta', d: b64u(meta)}));
 }
 
 function onSenderConn(conn) {
@@ -727,17 +938,15 @@ function onSenderConn(conn) {
         if (senderState === 'claimed') {
           try { if (conn.open) conn.close(); } catch(e){}
           releaseSlot();
+          sStep(2, 'active', '相手の接続を待っています', '相手が応答しなかったため、別の接続を待っています。');
           $('sStat').textContent = '相手が応答しなかったため、別の接続を待っています…';
         }
       }, CLAIM_TIMEOUT);
 
       $('sStat').textContent = '相手が接続しました。相手の操作を待っています…';
-      const meta = await encrypt(curKey, enc.encode(JSON.stringify({
-        name: curFile.name, size: curFile.size, type: curFile.type,
-        chunk: curChunk, sid: curSid
-      })), META_AAD);
-      if (slotConn !== conn) return;   // 送信途中に予約が変わっていたら中止
-      conn.send(JSON.stringify({t:'meta', d: b64u(meta)}));
+      sStep(2, 'done', '相手と接続しました', 'ファイル転送を開始できます。');
+      sStep(3, 'wait', 'ファイル転送', '相手がダウンロードを開始すると転送します。');
+      await sendMetaTo(conn);
     } catch (e) { /* close側で処理 */ }
   });
 
@@ -794,8 +1003,17 @@ function onSenderConn(conn) {
 
 async function sendFile(conn, offset) {
   senderState = 'sending';
+  sStep(3, 'active', 'ファイルを送信中…');
   const file = curFile, key = curKey, total = file.size, cs = curChunk;
-  const report = makeProgress(s => $('sStat').textContent = s);
+  const report = makeProgress(info => {
+    $('sBar').style.width = info.percent + '%';
+    $('sPct').textContent = info.percent + '%';
+    $('sSizes').textContent = fmtSize(info.done) + ' / ' + fmtSize(info.total) + (info.rate ? ' ・ ' + fmtSize(info.rate) + '/秒' : '');
+    let t = info.label;
+    if (isFinite(info.eta) && info.eta > 0) t += ' ・ 残り約' + fmtEta(info.eta);
+    $('sStat').textContent = t;
+  });
+  const fileLabel = curFiles.length > 1 ? '(' + (curIdx + 1) + '/' + curFiles.length + '件目) ' : '';
   let pos = offset;
   const t0 = Date.now(), base = offset;
   // バックプレッシャー: 受信側からのflow確認で送信を制御(実際の受信はonSenderConnのdataハンドラ)
@@ -827,7 +1045,7 @@ async function sendFile(conn, offset) {
         clearTimeout(waitTimer);
       }
       $('sBar').style.width = (pos / total * 100) + '%';
-      report('送信中', pos, total, base, t0, pos === total);
+      report(fileLabel + '送信中', pos, total, base, t0, pos === total);
     }
     conn.send(JSON.stringify({t:'done', size: total, sid: curSid}));
     $('sStat').textContent = '送信しました。受信側の検証を待っています…';
@@ -852,7 +1070,30 @@ function onAck() {
   senderState = 'finishing';
   recvDone++;
   $('sBar').style.width = '100%';
+  // 複数ファイル: 次のファイルのメタを同じ接続で送る
+  if (curIdx < curFiles.length - 1) {
+    $('sStat').innerHTML = '<span class="ok">' + (curIdx + 1) + '/' + curFiles.length + ' 件目の受信が完了しました。次のファイルを準備しています…</span>';
+    setTimeout(async () => {
+      if (senderState !== 'finishing' || !slotConn || !slotConn.open) return;
+      curIdx++;
+      curFile = curFiles[curIdx];
+      curSid = randSid();
+      $('sName').textContent = curFileLabel();
+      $('sSize').textContent = fmtSize(curFile.size) + ' · ' + typeLabel(curFile.type);
+      $('sCheck').classList.add('hidden');
+      $('sBar').style.width = '0';
+      $('sStat').textContent = (curIdx + 1) + '/' + curFiles.length + ' 件目「' + curFile.name + '」— 相手の操作を待っています…';
+      sStep(3, 'wait', 'ファイル転送', '次のファイルのダウンロード開始を待っています。');
+      senderState = 'claimed';
+      try { await sendMetaTo(slotConn); } catch (e) {}
+    }, 800);
+    return;
+  }
   $('sStat').innerHTML = '<span class="ok">受信側での検証・保存が完了しました</span>';
+  $('sDoneMsg').textContent = curFiles.length > 1 ? 'すべてのファイル (' + curFiles.length + '件) の転送が完了しました' : 'ファイルの転送が完了しました';
+  $('sDone').classList.remove('hidden');
+  sStep(3, 'done', '転送が完了しました', '受信側での検証・保存が完了しました。');
+  $('sCheck').classList.remove('hidden');
   if (maxRecv && recvDone >= maxRecv) {
     const p = peer;
     setTimeout(() => { if (peer === p) stopShare(maxRecv === 1 ? '1回の受信が完了したため、共有を終了しました。' : '受信回数の上限(' + maxRecv + '回)に達したため、共有を終了しました。'); }, 1500);
@@ -872,14 +1113,21 @@ function stopShare(msg) {
   $('expire').textContent = '';
   $('link').value = '';
   clearShareQR();
+  $('sDone').classList.add('hidden');
   $('sStat').innerHTML = '<b>' + esc(msg || '共有を終了しました。') + '</b>';
   $('stop').textContent = '新しいファイルを共有';
 }
 function resetSender() {
   ended = false; curFile = null; curKey = null; curSid = null; slotConn = null; recvDone = 0;
+  curFiles = []; curIdx = 0; pendingFiles = [];
+  renderFileList();
   senderState = 'idle';
   fileInput.value = '';
   $('sBar').style.width = '0';
+  $('sPct').textContent = '0%';
+  $('sSizes').textContent = '';
+  $('sCheck').classList.add('hidden');
+  $('sDone').classList.add('hidden');
   $('sStat').textContent = '';
   $('stop').textContent = '共有をやめる';
   $('shareCard').classList.add('hidden');
@@ -927,26 +1175,34 @@ async function initReceiver() {
   try { key = await crypto.subtle.importKey('raw', unb64u(keyStr), 'AES-GCM', false, ['decrypt']); }
   catch(e) { setStepError(1, 'URLの鍵が正しくありません。'); return; }
 
+  function setBadge(i, cls, text) {
+    const b = $('rb' + i);
+    if (!b) return;
+    b.className = 'step-badge' + (cls ? ' ' + cls : '');
+    b.textContent = text;
+  }
   function setStepActive(n) {
     for (let i = 1; i <= 3; i++) {
       const step = $('step' + i);
       const icon = step.querySelector('.step-icon');
       step.classList.remove('active', 'done', 'error');
       icon.classList.remove('active', 'done', 'error', 'waiting');
-      if (i < n) { step.classList.add('done'); icon.classList.add('done'); }
-      else if (i === n) { step.classList.add('active'); icon.classList.add('active'); }
-      else icon.classList.add('waiting');
+      if (i < n) { step.classList.add('done'); icon.classList.add('done'); setBadge(i, 'done', '完了'); }
+      else if (i === n) { step.classList.add('active'); icon.classList.add('active'); setBadge(i, 'active', i === 3 ? '転送中' : '接続中'); }
+      else { icon.classList.add('waiting'); setBadge(i, '', '待機中'); }
     }
   }
   function setStepDone(n) {
     const step = $('step' + n), icon = step.querySelector('.step-icon');
     step.classList.remove('active', 'error'); step.classList.add('done');
     icon.classList.remove('active', 'error', 'waiting'); icon.classList.add('done');
+    setBadge(n, 'done', '完了');
   }
   function setStepError(n, msg) {
     const step = $('step' + n), icon = step.querySelector('.step-icon');
     step.classList.remove('active', 'done'); step.classList.add('error');
     icon.classList.remove('active', 'done', 'waiting'); icon.classList.add('error');
+    setBadge(n, 'error', 'エラー');
     if (msg) $('rState').innerHTML = '<span class="err">' + esc(msg) + '</span>';
   }
   function updateStepLabel(n, text) { $('step' + n).querySelector('.step-label').textContent = text; }
@@ -962,7 +1218,13 @@ async function initReceiver() {
   let lastChunkAt = 0, t0 = 0, base = 0;
   const memCap = memoryCap();
   const timers = [];
-  const report = makeProgress(s => $('rStat').textContent = s);
+  const report = makeProgress(info => {
+    $('rBar').style.width = info.percent + '%';
+    $('rPct').textContent = info.percent + '%';
+    $('rSizes').textContent = fmtSize(info.done) + ' / ' + fmtSize(info.total);
+    $('rStat').textContent = info.rate ? fmtSize(info.rate) + '/秒' : '';
+    $('rEta').textContent = isFinite(info.eta) && info.eta > 0 ? '残り約' + fmtEta(info.eta) : '';
+  });
   const later = (fn, ms) => { const t = setTimeout(fn, ms); timers.push(t); return t; };
   const clearTimers = () => { timers.forEach(clearTimeout); timers.length = 0; };
 
@@ -986,6 +1248,7 @@ async function initReceiver() {
     setStepError(started ? 3 : (meta ? 2 : 1), msg);
     $('dl').classList.add('hidden');
     $('actionArea').classList.add('hidden');
+    $('rDone').classList.add('hidden');
     try { if (conn && conn.open) conn.send(JSON.stringify({t:'fail'})); } catch(e){}
     if (writable) { try { writable.abort(); } catch(e){} writable = null; }
     chunks = [];
@@ -1047,13 +1310,44 @@ async function initReceiver() {
       updateStepLabel(2, 'ファイル情報を検証しました');
       $('fileInfo').classList.remove('hidden');
       $('rName').textContent = meta.name;
-      $('rSize').textContent = fmtSize(meta.size);
+      $('rSize').textContent = fmtSize(meta.size) + ' · ' + typeLabel(meta.type);
+      $('rCheck').classList.add('hidden');
       $('rState').textContent = '受信の準備ができました。ボタンを押すと保存先を選んで開始します。';
       $('dl').classList.remove('hidden');
       $('actionArea').classList.remove('hidden');
+    } else if (sid !== info.sid) {
+      // 次のファイル: 状態をリセットして受信準備へ(複数ファイルの連続転送)
+      meta = {name: safeName(info.name), size: info.size, type: info.type || ''};
+      sid = info.sid;
+      chunkSize = info.chunk;
+      if (meta.size > memCap) {
+        throw verr('このブラウザでは約' + fmtSize(memCap) + 'を超えるファイルは安全に受信できません。PCのChrome/Edgeをお使いください。');
+      }
+      received = 0; chunks = []; pending = 0; pendingBytes = 0; processedSinceFlow = 0;
+      finished = false; started = false; chain = Promise.resolve();
+      $('rName').textContent = meta.name;
+      $('rSize').textContent = fmtSize(meta.size) + ' · ' + typeLabel(meta.type);
+      $('rCheck').classList.add('hidden');
+      $('rBar').style.width = '0';
+      $('rPct').textContent = '0%';
+      $('rStat').textContent = '';
+      $('rEta').textContent = '';
+      $('rSizes').textContent = '';
+      $('rDone').classList.add('hidden');
+      $('rState').textContent = '次のファイルの受信準備ができました。ボタンを押すと保存先を選んで開始します。';
+      $('dl').disabled = false;
+      $('dl').textContent = 'ダウンロード開始';
+      $('dl').classList.remove('hidden');
+      $('actionArea').classList.remove('hidden');
+      const st3 = $('step3'), ic3 = st3.querySelector('.step-icon');
+      st3.classList.remove('done', 'active', 'error');
+      ic3.classList.remove('done', 'active', 'error', 'waiting');
+      ic3.classList.add('waiting');
+      setBadge(3, '', '待機中');
+      updateStepLabel(3, 'ファイルを受信中…');
     } else {
       // 再接続: 同一転送であることの検証(②整合性)
-      if (sid !== info.sid || meta.size !== info.size || chunkSize !== info.chunk) {
+      if (meta.size !== info.size || chunkSize !== info.chunk) {
         throw verr('再接続先のファイルが元の転送と一致しません。');
       }
     }
@@ -1102,16 +1396,22 @@ async function initReceiver() {
     setStepDone(3);
     updateStepLabel(3, '受信・検証が完了しました');
     $('rBar').style.width = '100%';
-    $('rStat').textContent = '100% 完了';
+    $('rPct').textContent = '100%';
+    $('rStat').textContent = '';
+    $('rEta').textContent = '';
+    $('rSizes').textContent = fmtSize(meta.size) + ' / ' + fmtSize(meta.size);
+    $('rDone').classList.remove('hidden');
+    $('rCheck').classList.remove('hidden');
     $('rState').innerHTML = '<span class="ok">ファイルの受信が完了しました</span>';
     $('dl').classList.add('hidden');
     $('actionArea').classList.add('hidden');
     try { conn.send(JSON.stringify({t:'ack'})); } catch(e){}
-    setTimeout(() => { try { rpeer.destroy(); } catch(e){} }, 1500);
+    // 複数ファイルの連続転送に備え、ここでは接続を維持する(送信側の終了処理で切断される)
   }
 
   function onData(raw) {
-    if (failed || finished) return;
+    if (failed) return;
+    if (finished && typeof raw !== 'string') return;   // 完了後のチャンクは無視。次ファイルのmetaは受け付ける
     try {
       if (typeof raw === 'string') {
         const m = parseMsg(raw);
