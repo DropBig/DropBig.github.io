@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#000000">
+<!-- CSP: インラインstyle属性を使用するためstyle-srcは'unsafe-inline'。運用時はインラインスクリプトを外部ファイル+nonce移行を推奨 -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com; style-src 'unsafe-inline'; connect-src 'self' https://0.peerjs.com wss://0.peerjs.com; img-src 'self' data: blob:; media-src blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>DropBig - 登録不要のP2Pファイル転送</title>
 <style>
 :root{color-scheme:dark;--bg:#000;--text:#f5f6f8;--sub:#b3b7c2;--line:#262626;--accent:#3b6ef5;--accent2:#6b7cf0;--icon:#6f8cff;--ok:#32d583;--err:#f97066;--scale:0.78}
@@ -18,7 +20,7 @@ svg{display:block}
 #drop{border:2px dashed var(--accent2);border-radius:12px;padding:20px 16px 20px;text-align:center;background:transparent;transition:.15s}
 #drop.over{background:rgba(107,124,240,.1)}
 #drop:focus-visible,button:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-#drop .cloud{width:28px;height:28px;margin:0 auto 14px;color:var(--icon)}
+#drop .cloud{width:30px;height:30px;margin:0 auto 14px;color:var(--icon);background:rgba(107,124,240,.14);border-radius:50%;padding:16px;box-sizing:content-box}
 #drop b{display:block;font-size:14px;line-height:20px;font-weight:700}
 #drop span{display:block;color:#d2d5dc;font-size:12px;line-height:18px;margin:10px 0 10px}
 #pick{padding:10px 18px;font-size:13px;line-height:18px;min-width:130px}
@@ -51,7 +53,49 @@ button:disabled{opacity:.5;cursor:default}
 #qr img,#qr canvas{background:#fff;padding:6px;border-radius:6px}
 .fname{font-weight:700;word-break:break-all;font-size:14px}
 .head{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:3px}
-@media (max-width:520px){main{padding:16px 12px 18px}.safe{padding:12px 4px 0}}
+@media (max-width:520px){
+  body{padding:10px;font-size:15px}
+  main{padding:18px 14px 22px;border-radius:14px}
+  .top{margin-bottom:18px;padding:14px 0 4px}
+  h1{font-size:26px;line-height:32px}
+  .lead{font-size:16px;line-height:22px;margin:8px 0 0}
+  .sub-lead{font-size:13px;line-height:19px;max-width:100%}
+  #drop{padding:28px 16px;border-radius:14px}
+  #drop .cloud{width:34px;height:34px;padding:20px;margin-bottom:16px}
+  #drop b{font-size:19px;line-height:26px}
+  #drop span{font-size:14px;line-height:21px;margin:12px 0 14px}
+  #pick{padding:13px 28px;font-size:16px;line-height:22px;min-width:180px}
+  .drop-hint{font-size:12px;margin-top:12px}
+  .settings{margin-top:22px}
+  .settings h2,.safe h2{font-size:17px}
+  .srow{min-height:58px}
+  .srow:nth-of-type(1){min-height:56px}
+  .srow:nth-of-type(2){min-height:60px}
+  .srow:nth-of-type(3){min-height:56px}
+  .srow label{font-size:16px}
+  select{font-size:16px;padding:8px 26px 8px 8px;background-size:14px}
+  .safe p{font-size:13px;line-height:19px}
+  button{font-size:15px;padding:11px 18px;border-radius:10px}
+  .small{font-size:12px}
+  .fname{font-size:16px}
+  input[type=text]{font-size:13px;padding:10px 12px}
+  .bar{height:9px}
+  #qr img,#qr canvas{padding:8px;border-radius:8px}
+  .file-info{padding:14px;gap:14px}
+  .file-icon{width:36px;height:36px}
+  .file-details .fname{font-size:16px}
+  .step-icon{width:22px;height:22px}
+  .step-icon.waiting::after,.step-icon.active::after{inset:7px}
+  .step-icon.done::after{font-size:13px}
+  .step-icon.error::after{font-size:11px}
+  .step-label{font-size:14px}
+  #dl{padding:14px 20px;font-size:16px}
+  .features{grid-template-columns:1fr;gap:10px;margin-top:22px;padding-top:16px}
+  .feature-card{padding:14px;text-align:left;display:flex;align-items:center;gap:12px}
+  .feature-icon{width:28px;height:28px;margin:0;flex:none}
+  .feature-card h3{font-size:14px;margin:0 0 2px}
+  .feature-card p{font-size:11px;line-height:16px}
+}
 
 /* 受信画面 - ステップ表示 */
 .steps{display:flex;flex-direction:column;gap:0;margin-bottom:14px}
@@ -153,6 +197,10 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
           <label for="cnt">受信回数</label>
           <select id="cnt"><option value="1" selected>1回のみ</option><option value="3">3回まで</option><option value="0">何回でも</option></select>
         </div>
+        <div class="srow">
+          <label for="csz">転送単位</label>
+          <select id="csz"><option value="61440" selected>60 KB(安定)</option><option value="131072">128 KB(標準)</option><option value="262144">256 KB(高速)</option></select>
+        </div>
       </section>
 
       <section class="safe" id="safe">
@@ -195,6 +243,7 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
       <div class="bar"><i id="sBar"></i></div>
       <div class="small" id="sStat" role="status" aria-live="polite">相手の接続を待っています…</div>
       <div class="small" style="margin-top:10px">完了と表示されるまで、このタブを開いたままにしてください。有効期限もこのタブが開いている間だけ有効です。</div>
+      <div class="small" style="margin-top:6px;color:#e0a75e">この URL には復号鍵が含まれています。信頼できる相手のみに送り、公開掲示板等には貼らないでください。</div>
       <div style="margin-top:12px"><button class="sec" id="stop">共有をやめる</button></div>
     </div>
   </section>
@@ -250,18 +299,90 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
 
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <script>
-(() => {
+/* ============================================================
+ * DropBig - P2Pファイル転送(強化版)
+ * 改善点:
+ *  1. 受信枠の予約制(受信回数制限の競合を防止)
+ *  2. 転送セッションID(sid)による再接続時の同一性検証
+ *  3. メモリ使用量の制御(保存先API未対応環境のサイズ上限・蓄積監視)
+ *  4. 統一されたタイムアウト管理(接続/メタ/停滞/ACK)
+ *  5. メッセージ種別ごとの厳密な検証
+ *  6. CDNフォールバックローダ(単一配信元への依存を低減)
+ *  7. チャンクサイズの選択可能化 + バッファ滞留監視
+ *  8. 受信キューの深さ制限 + 進捗表示のスロットル
+ * ============================================================ */
+
+/* ---------- CDNローダ(複数配信元でフォールバック) ---------- */
+function loadScript(urls){
+  return new Promise((resolve, reject) => {
+    const attempt = i => {
+      if (i >= urls.length) return reject(new Error('script load failed: ' + urls[0]));
+      const s = document.createElement('script');
+      s.src = urls[i];
+      s.crossOrigin = 'anonymous';
+      // SRIハッシュが登録されている配信元のみ検証を適用
+      if (SRI_MAP[urls[i]]) s.integrity = SRI_MAP[urls[i]];
+      s.onload = () => resolve();
+      s.onerror = () => attempt(i + 1);
+      document.head.appendChild(s);
+    };
+    attempt(0);
+  });
+}
+
+const peerSrcs = [
+  'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js',
+  'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js'
+];
+// SRI: cdnjs版qrcode.min.jsはsha512ハッシュを検証済み。
+// PeerJSは公開SRIハッシュが検証できないためバージョン固定+フォールバックで管理。
+// 運用時は以下のopensslコマンドでハッシュを生成しSRI_MAPに追記すること:
+//   curl -s URL | openssl dgst -sha512 -binary | openssl base64 -A
+const SRI_MAP = {
+  'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js':
+    'sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA=='
+};
+const qrSrcs = [
+  'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',
+  'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js',
+  'https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js'
+];
+
+Promise.all([
+  loadScript(peerSrcs),
+  loadScript(qrSrcs).catch(() => {})   // QRは必須ではない
+]).then(boot).catch(() => {
+  document.addEventListener('DOMContentLoaded', () => {
+    document.body.insertAdjacentHTML('beforeend',
+      '<div style="position:fixed;inset:auto 0 0 0;padding:12px;background:#3a1212;color:#ffd9d9;text-align:center;font-size:13px">ライブラリを読み込めませんでした。ネットワーク・広告ブロッカーを確認して再読み込みしてください。</div>');
+  });
+});
+
+function boot(){
+if (typeof Peer === 'undefined') {
+  document.body.insertAdjacentHTML('beforeend',
+    '<div style="position:fixed;inset:auto 0 0 0;padding:12px;background:#3a1212;color:#ffd9d9;text-align:center;font-size:13px">通信ライブラリを初期化できませんでした。再読み込みしてください。</div>');
+  return;
+}
+
 const $ = id => document.getElementById(id);
-const CHUNK = 60 * 1024;
-const MAX_BUFFER = 8 * 1024 * 1024;
-const MAX_MSG_LEN = 20000;          // 制御メッセージの最大長
+const MAX_MSG_LEN = 20000;
 const MAX_NAME_LEN = 255;
-const MAX_FILE_SIZE = 2 ** 40;      // 1TB(異常値の拒否用)
+const MAX_FILE_SIZE = 2 ** 40;
 const ACK_TIMEOUT = 60000;
-const MAX_RETRY = 5;
+const CONNECT_TIMEOUT = 20000;
+const META_TIMEOUT = 30000;          // 受信側: メタデータ待機
+const STALL_TIMEOUT = 60000;         // 受信側: チャンク停滞
+const CLAIM_TIMEOUT = 600000;        // 送信側: 受信枠の予約保持(開始されなければ解放)
+const BUFFER_STALL_TIMEOUT = 30000;  // 送信側: bufferedAmount 滞留
+const PROGRESS_MIN_INTERVAL = 200;   // 進捗表示の更新間隔
+const MAX_PENDING_CHUNKS = 400;      // 受信側: 処理待ちチャンク上限(個数)
+const MAX_PENDING_BYTES = 48 * 1024 * 1024; // 受信側: 処理待ちバイト上限
+const FLOW_WINDOW = 64;              // 送信側: 未確認チャンクの送信上限
+const FLOW_ACK_EVERY = 32;           // 受信側: この個数処理するごとにflowを返す
+const CHUNK_MIN = 16 * 1024, CHUNK_MAX = 1024 * 1024;
 const enc = new TextEncoder(), dec = new TextDecoder();
 const META_AAD = enc.encode('meta');
 
@@ -270,12 +391,19 @@ const fmtEta = s => !isFinite(s) ? '' : s < 60 ? Math.ceil(s) + '秒' : Math.flo
 const b64u = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 const unb64u = s => Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')), c => c.charCodeAt(0));
 const randId = () => 'db-' + Array.from(crypto.getRandomValues(new Uint8Array(10)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join('');
+const randSid = () => b64u(crypto.getRandomValues(new Uint8Array(16)));
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const verr = msg => Object.assign(new Error(msg), {userMsg: msg});
 
-// チャンク番号をAADに結び付け、並べ替え・重複・欠落を復号時に検出する
-const chunkAad = i => { const b = new Uint8Array(8); new DataView(b.buffer).setUint32(4, i); return b; };
+/* ---------- 暗号 ---------- */
+const chunkAad = (cs, i) => {          // チャンクサイズもAADに含め、チャンク単位の混同を検出
+  const b = new Uint8Array(12);
+  const dv = new DataView(b.buffer);
+  dv.setUint32(0, cs);
+  dv.setUint32(8, i);
+  return b;
+};
 
 async function encrypt(key, data, aad) {
   const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -290,33 +418,73 @@ async function decrypt(key, buf, aad) {
   return crypto.subtle.decrypt({name:'AES-GCM', iv: u.slice(0,12), additionalData: aad}, key, u.slice(12));
 }
 
-// 制御メッセージの安全な解析(JSONエラー・型違い・過大データを拒否)
+/* ---------- メッセージ検証(種別ごとの厳密チェック) ---------- */
+// メッセージごとの必須フィールドと許可キー(余分なフィールドは拒否)
+const MSG_SCHEMA = {
+  meta:  { req: {d: s => typeof s === 'string' && s.length > 0 && s.length <= MAX_MSG_LEN} },
+  start: { req: {sid: s => typeof s === 'string' && s.length <= 64,
+                 offset: n => Number.isSafeInteger(n) && n >= 0} },
+  done:  { req: {sid: s => typeof s === 'string' && s.length <= 64,
+                 size: n => Number.isSafeInteger(n) && n >= 0} },
+  flow:  { req: {n: n => Number.isSafeInteger(n) && n >= 0} },
+  ack:   { req: {} }, fail: { req: {} }, busy: { req: {} }, ended: { req: {} }
+};
 function parseMsg(d) {
   if (typeof d !== 'string' || d.length > MAX_MSG_LEN) return null;
-  try {
-    const m = JSON.parse(d);
-    return (m && typeof m === 'object' && typeof m.t === 'string') ? m : null;
-  } catch (e) { return null; }
+  let m;
+  try { m = JSON.parse(d); } catch (e) { return null; }
+  if (!m || typeof m !== 'object' || typeof m.t !== 'string') return null;
+  const sch = MSG_SCHEMA[m.t];
+  if (!sch) return null;
+  const keys = Object.keys(m);
+  // 許可キーは t + 必須フィールドのみ
+  const allowed = new Set(['t', ...Object.keys(sch.req)]);
+  for (const k of keys) if (!allowed.has(k)) return null;
+  for (const [k, test] of Object.entries(sch.req)) {
+    if (!test(m[k])) return null;
+  }
+  return m;
 }
 const safeName = n => n.replace(/[\\/:*?"<>|\x00-\x1f]/g, '_').slice(0, MAX_NAME_LEN) || 'download';
 
-function progressText(label, done, total, base, t0) {
-  let s = label + ' ' + (total ? Math.floor(done / total * 100) : 100) + '%(' + fmtSize(done) + ' / ' + fmtSize(total) + ')';
-  const sec = (Date.now() - t0) / 1000;
-  if (sec > 1 && done > base) {
-    const rate = (done - base) / sec;
-    s += ' ・ ' + fmtSize(rate) + '/秒';
-    const eta = fmtEta((total - done) / rate);
-    if (eta) s += ' ・ 残り約' + eta;
-  }
-  return s;
+/* ---------- 進捗表示(スロットル付き) ---------- */
+function makeProgress(onText){
+  let last = 0, lastBytes = 0;
+  return (label, done, total, base, t0, force) => {
+    const now = Date.now();
+    // 一定時間経過 または 256KB進捗 のどちらかで更新(巨大ファイルのDOM更新負荷を抑制)
+    if (!force && now - last < PROGRESS_MIN_INTERVAL && done - lastBytes < 262144) return;
+    last = now; lastBytes = done;
+    let s = label + ' ' + (total ? Math.floor(done / total * 100) : 100) + '%(' + fmtSize(done) + ' / ' + fmtSize(total) + ')';
+    const sec = (now - t0) / 1000;
+    if (sec > 1 && done > base) {
+      const rate = (done - base) / sec;
+      s += ' ・ ' + fmtSize(rate) + '/秒';
+      const eta = fmtEta((total - done) / rate);
+      if (eta) s += ' ・ 残り約' + eta;
+    }
+    onText(s);
+  };
+}
+
+/* ---------- メモリ上限の推定 ---------- */
+function memoryCap(){
+  if (window.showSaveFilePicker && window.isSecureContext) return MAX_FILE_SIZE; // ストリーム保存可
+  let cap = 1.5 * 1024 * 1024 * 1024;
+  const dm = navigator.deviceMemory;   // GB単位(Chrome)
+  if (dm) cap = Math.min(cap, Math.max(256 * 1024 * 1024, (dm / 4) * 1024 * 1024 * 1024));
+  return Math.floor(cap);
 }
 
 /* ================= 送信側 ================= */
-let peer = null, expireTimer = null, countTimer = null, ackTimer = null;
-let sending = false, starting = false, ended = false, opened = false;
-let curFile = null, curKey = null, activeConn = null;
-let ttlMins = 60, maxRecv = 1, recvDone = 0;   // 共有の設定(ファイル選択時に確定)
+let peer = null;
+let expireTimer = null, countTimer = null, ackTimer = null, claimTimer = null;
+let senderState = 'idle';   // idle | claimed | sending | waitack | finishing | closed
+let flowResolve = null;      // バックプレッシャー: 受信側flow待ちのリゾルバ
+let curFile = null, curKey = null, curSid = null, curChunk = 61440;
+let slotConn = null;         // 受信枠を予約した接続
+let ttlMins = 60, maxRecv = 1, recvDone = 0;
+let starting = false, ended = false, opened = false;
 
 const drop = $('drop'), fileInput = $('file');
 $('pick').onclick = () => fileInput.click();
@@ -327,21 +495,39 @@ document.addEventListener('drop', ev => {
   if (f && !peer && !starting && !location.hash) startShare(f);
 });
 fileInput.onchange = () => { if (fileInput.files[0]) startShare(fileInput.files[0]); };
-window.addEventListener('beforeunload', ev => { if (sending) { ev.preventDefault(); ev.returnValue = ''; } });
+window.addEventListener('beforeunload', ev => { if (senderState === 'sending' || senderState === 'claimed') { ev.preventDefault(); ev.returnValue = ''; } });
+
+function isSlotBusy(){
+  return senderState === 'claimed' || senderState === 'sending' ||
+         senderState === 'waitack' || senderState === 'finishing';
+}
+function releaseSlot(){
+  slotConn = null;
+  clearTimeout(claimTimer);
+  if (senderState === 'claimed' || senderState === 'sending') senderState = 'idle';
+}
 
 async function startShare(file) {
-  if (starting || peer) return;           // 連打・二重実行の防止
+  if (starting || peer) return;
   starting = true;
   if (ended) resetSender();
   try {
+    // 送信開始前のファイルサイズ検証(異常値を早めに拒否)
+    if (!Number.isSafeInteger(file.size) || file.size < 0 || file.size > MAX_FILE_SIZE) {
+      alert('ファイルサイズがサポート範囲を超えています。');
+      starting = false;
+      return;
+    }
     curFile = file;
     ttlMins = +$('ttl').value;
     maxRecv = +$('cnt').value;
+    curChunk = +$('csz').value;
     recvDone = 0;
+    curSid = randSid();   // 転送セッションID(再接続時の同一性検証用)
     curKey = await crypto.subtle.generateKey({name:'AES-GCM', length:256}, true, ['encrypt','decrypt']);
     const rawKey = b64u(await crypto.subtle.exportKey('raw', curKey));
     const id = randId();
-    opened = false;
+    opened = false; senderState = 'idle';
     $('setupView').classList.add('hidden');
     $('shareCard').classList.remove('hidden');
     $('sName').textContent = file.name;
@@ -351,13 +537,17 @@ async function startShare(file) {
 
     peer = new Peer(id);
     const myPeer = peer;
-    const connectTimer = setTimeout(() => { if (peer === myPeer && !opened) stopShare('サーバーに接続できませんでした。ネットワークを確認してやり直してください。'); }, 20000);
+    const connectTimer = setTimeout(() => {
+      if (peer === myPeer && !opened) stopShare('サーバーに接続できませんでした。ネットワークを確認してやり直してください。');
+    }, CONNECT_TIMEOUT);
     peer.on('open', () => {
       opened = true; clearTimeout(connectTimer);
       const url = location.origin + location.pathname + '#' + id + '.' + rawKey;
       $('link').value = url;
       $('qr').innerHTML = '';
-      try { new QRCode($('qr'), {text: url, width: 130, height: 130}); } catch(e){}
+      if (typeof QRCode !== 'undefined') {
+        try { new QRCode($('qr'), {text: url, width: 130, height: 130}); } catch(e){}
+      }
       $('sStat').textContent = '相手の接続を待っています…';
       const mins = ttlMins;
       const endAt = Date.now() + mins * 60000;
@@ -370,8 +560,8 @@ async function startShare(file) {
     peer.on('disconnected', () => { if (peer === myPeer && !myPeer.destroyed) { try { myPeer.reconnect(); } catch(e){} } });
     peer.on('error', e => {
       if (peer !== myPeer) return;
-      if (!opened) { clearTimeout(connectTimer); stopShare('接続エラー: ' + e.type); return; }
-      $('sStat').innerHTML = '<span class="err">接続エラー: ' + esc(e.type) + '</span>';
+      if (!opened) { clearTimeout(connectTimer); stopShare('接続エラーが発生しました。もう一度お試しください。'); return; }
+      $('sStat').innerHTML = '<span class="err">接続エラーが発生しました。</span>';
     });
     peer.on('connection', conn => onSenderConn(conn));
   } catch (e) {
@@ -386,94 +576,167 @@ async function startShare(file) {
 function onSenderConn(conn) {
   conn.on('open', async () => {
     try {
-      if (sending) { conn.send(JSON.stringify({t:'busy'})); setTimeout(() => conn.close(), 500); return; }
-      if (!curFile || !curKey) return;
+      /* --- 受信枠の予約: 1接続のみ許可(競合防止) --- */
+      // claimedかつslotConnが空の場合は「切断後の再接続待ち」なので再予約を許可する。
+      // 同一転送であることは、後続のstartメッセージのsid検証で担保する。
+      const resumeWaiting = senderState === 'claimed' && slotConn === null;
+      if ((isSlotBusy() && !resumeWaiting) || senderState === 'closed') {
+        conn.send(JSON.stringify(senderState === 'closed' ? {t:'ended'} : {t:'busy'}));
+        setTimeout(() => { try { conn.close(); } catch(e){} }, 500);
+        return;
+      }
+      if (!curFile || !curKey || !curSid) return;
+
+      // 予約: この接続が受信枠を占有。開始されなければ期限で解放
+      slotConn = conn;
+      senderState = 'claimed';
+      clearTimeout(claimTimer);
+      claimTimer = setTimeout(() => {
+        if (senderState === 'claimed') {
+          try { if (conn.open) conn.close(); } catch(e){}
+          releaseSlot();
+          $('sStat').textContent = '相手が応答しなかったため、別の接続を待っています…';
+        }
+      }, CLAIM_TIMEOUT);
+
       $('sStat').textContent = '相手が接続しました。相手の操作を待っています…';
-      const meta = await encrypt(curKey, enc.encode(JSON.stringify({name: curFile.name, size: curFile.size, type: curFile.type})), META_AAD);
+      const meta = await encrypt(curKey, enc.encode(JSON.stringify({
+        name: curFile.name, size: curFile.size, type: curFile.type,
+        chunk: curChunk, sid: curSid
+      })), META_AAD);
+      if (slotConn !== conn) return;   // 送信途中に予約が変わっていたら中止
       conn.send(JSON.stringify({t:'meta', d: b64u(meta)}));
-    } catch (e) { /* 接続が閉じた場合など。close側で処理 */ }
+    } catch (e) { /* close側で処理 */ }
   });
+
   conn.on('data', d => {
     const m = parseMsg(d);
     if (!m || !curFile) return;
+
     if (m.t === 'start') {
-      const off = m.offset;
-      if (!Number.isSafeInteger(off) || off < 0 || off > curFile.size || off % CHUNK !== 0) {
-        try { conn.send(JSON.stringify({t:'fail', reason:'offset'})); } catch(e){}
+      // セッションIDの一致とオフセット整合を検証(別ファイル・別セッションへの切替を防止)
+      if (m.sid !== curSid || conn !== slotConn) {
+        try { conn.send(JSON.stringify({t:'fail'})); } catch(e){}
         return;
       }
-      if (sending) return;
+      const off = m.offset;
+      if (off > curFile.size || off % curChunk !== 0) {
+        try { conn.send(JSON.stringify({t:'fail'})); } catch(e){}
+        return;
+      }
+      if (senderState !== 'claimed') return;   // 二重開始の防止
       sendFile(conn, off);
+    } else if (m.t === 'flow') {
+      // 受信側の処理確認: 送信ウィンドウを解放
+      if (conn === slotConn && senderState === 'sending' && flowResolve) {
+        const r = flowResolve; flowResolve = null; r();
+      }
     } else if (m.t === 'ack') {
-      if (conn === activeConn && sending) onAck();
+      if (conn === slotConn && senderState === 'waitack') onAck();
     } else if (m.t === 'fail') {
-      if (conn === activeConn && sending) {
-        clearTimeout(ackTimer); sending = false;
+      if (conn === slotConn && (senderState === 'sending' || senderState === 'waitack')) {
+        clearTimeout(ackTimer);
+        if (senderState === 'sending') senderState = 'claimed'; else releaseSlot();
         $('sStat').innerHTML = '<span class="err">受信側の検証に失敗しました。相手にもう一度開いてもらってください。</span>';
       }
     }
   });
+
   conn.on('close', () => {
-    if (conn === activeConn && sending) {
-      clearTimeout(ackTimer); sending = false;
-      $('sStat').innerHTML = '<span class="err">相手との接続が切れました。相手の再接続を待っています(相手のページを開いたままなら自動で再開を試みます)。</span>';
+    if (conn === slotConn) {
+      clearTimeout(ackTimer);
+      // 古い接続を解放。新しい接続はopenハンドラで再予約され、
+      // startメッセージのsid+offset検証で同一転送か確認してから再開する。
+      slotConn = null;
+      if (senderState === 'sending' || senderState === 'waitack') {
+        senderState = 'claimed';   // 再接続待ち
+        $('sStat').innerHTML = '<span class="err">相手との接続が切れました。相手のページを開いたままなら自動で再開を試みます。</span>';
+      } else if (senderState === 'claimed') {
+        senderState = 'idle';
+        $('sStat').textContent = '相手の接続を待っています…';
+      }
     }
   });
   conn.on('error', () => {});
 }
 
 async function sendFile(conn, offset) {
-  sending = true; activeConn = conn;
-  const file = curFile, key = curKey, total = file.size;
+  senderState = 'sending';
+  const file = curFile, key = curKey, total = file.size, cs = curChunk;
+  const report = makeProgress(s => $('sStat').textContent = s);
   let pos = offset;
   const t0 = Date.now(), base = offset;
+  // バックプレッシャー: 受信側からのflow確認で送信を制御(実際の受信はonSenderConnのdataハンドラ)
+  let unacked = 0;
+  const waitFlow = () => new Promise(r => { flowResolve = r; });
   try {
     while (pos < total) {
       if (!conn.open) throw new Error('closed');
-      const buf = await file.slice(pos, Math.min(pos + CHUNK, total)).arrayBuffer();
-      const packet = await encrypt(key, buf, chunkAad(pos / CHUNK));
-      while (conn.dataChannel && conn.dataChannel.bufferedAmount > MAX_BUFFER) {
+      const buf = await file.slice(pos, Math.min(pos + cs, total)).arrayBuffer();
+      const packet = await encrypt(key, buf, chunkAad(cs, pos / cs));
+      // bufferedAmount 監視 + 滞留時間の計測
+      let stalled = 0;
+      while (conn.dataChannel && conn.dataChannel.bufferedAmount > 8 * 1024 * 1024) {
         await sleep(20);
+        stalled += 20;
         if (!conn.open) throw new Error('closed');
+        if (stalled > BUFFER_STALL_TIMEOUT) throw new Error('buffer stall');
       }
       if (!conn.open) throw new Error('closed');
       conn.send(packet);
       pos += buf.byteLength;
+      unacked++;
+      // ウィンドウ上限に達したら受信側の処理確認(flow)を待つ
+      if (unacked >= FLOW_WINDOW) {
+        const waitTimer = setTimeout(() => {
+          if (flowResolve) { const r = flowResolve; flowResolve = null; r(); } // 確認紛失時は再開(受信側の検証で最終的に担保)
+        }, 15000);
+        await waitFlow();
+        clearTimeout(waitTimer);
+      }
       $('sBar').style.width = (pos / total * 100) + '%';
-      $('sStat').textContent = progressText('送信中', pos, total, base, t0);
+      report('送信中', pos, total, base, t0, pos === total);
     }
-    conn.send(JSON.stringify({t:'done', size: total}));
+    conn.send(JSON.stringify({t:'done', size: total, sid: curSid}));
     $('sStat').textContent = '送信しました。受信側の検証を待っています…';
+    senderState = 'waitack';
     clearTimeout(ackTimer);
     ackTimer = setTimeout(() => {
-      if (conn === activeConn && sending) {
-        sending = false;
+      if (conn === slotConn && senderState === 'waitack') {
+        senderState = 'claimed';
         $('sStat').innerHTML = '<span class="err">受信側からの完了確認が届きませんでした。相手の受信状況をご確認ください。</span>';
       }
     }, ACK_TIMEOUT);
   } catch (e) {
-    if (conn === activeConn && sending) {
-      sending = false;
+    if (conn === slotConn && senderState === 'sending') {
+      senderState = 'claimed';
       if (conn.open) $('sStat').innerHTML = '<span class="err">送信中にエラーが発生しました。ファイルが変更・削除されていないか確認してください。</span>';
     }
   }
 }
 
 function onAck() {
-  clearTimeout(ackTimer); sending = false;
+  clearTimeout(ackTimer);
+  senderState = 'finishing';
   recvDone++;
   $('sBar').style.width = '100%';
   $('sStat').innerHTML = '<span class="ok">受信側での検証・保存が完了しました</span>';
   if (maxRecv && recvDone >= maxRecv) {
     const p = peer;
     setTimeout(() => { if (peer === p) stopShare(maxRecv === 1 ? '1回の受信が完了したため、共有を終了しました。' : '受信回数の上限(' + maxRecv + '回)に達したため、共有を終了しました。'); }, 1500);
+  } else {
+    // 次の受信に備えて予約を解放(finishing中は新規接続を拒否)
+    setTimeout(() => { if (senderState === 'finishing') { senderState = 'idle'; slotConn = null; } }, 1000);
   }
 }
 
 function stopShare(msg) {
-  clearTimeout(expireTimer); clearTimeout(ackTimer); clearInterval(countTimer);
+  clearTimeout(expireTimer); clearTimeout(ackTimer); clearTimeout(claimTimer); clearInterval(countTimer);
+  senderState = 'closed';
   if (peer) { try { peer.destroy(); } catch(e){} peer = null; }
-  sending = false; activeConn = null; opened = false; ended = true;
+  slotConn = null; opened = false; ended = true;
+  // 鍵とセッション情報への参照を解放(共有終了後は復号不可能に)
+  curKey = null; curSid = null; flowResolve = null;
   $('expire').textContent = '';
   $('link').value = '';
   $('qr').innerHTML = '';
@@ -481,7 +744,8 @@ function stopShare(msg) {
   $('stop').textContent = '新しいファイルを共有';
 }
 function resetSender() {
-  ended = false; curFile = null; curKey = null; activeConn = null; recvDone = 0;
+  ended = false; curFile = null; curKey = null; curSid = null; slotConn = null; recvDone = 0;
+  senderState = 'idle';
   fileInput.value = '';
   $('sBar').style.width = '0';
   $('sStat').textContent = '';
@@ -506,81 +770,69 @@ async function initReceiver() {
   $('recvView').appendChild($('safe'));
 
   const [pid, keyStr] = location.hash.slice(1).split('.');
-  if (!pid || !keyStr) {
-    setStepError(1, 'URLが正しくありません。');
-    return;
-  }
+  if (!pid || !keyStr) { setStepError(1, 'URLが正しくありません。'); return; }
 
   let key;
-  try {
-    key = await crypto.subtle.importKey('raw', unb64u(keyStr), 'AES-GCM', false, ['decrypt']);
-  } catch(e) {
-    setStepError(1, 'URLの鍵が正しくありません。');
-    return;
-  }
+  try { key = await crypto.subtle.importKey('raw', unb64u(keyStr), 'AES-GCM', false, ['decrypt']); }
+  catch(e) { setStepError(1, 'URLの鍵が正しくありません。'); return; }
 
-  // ステップ管理関数
   function setStepActive(n) {
     for (let i = 1; i <= 3; i++) {
       const step = $('step' + i);
       const icon = step.querySelector('.step-icon');
       step.classList.remove('active', 'done', 'error');
       icon.classList.remove('active', 'done', 'error', 'waiting');
-      if (i < n) {
-        step.classList.add('done');
-        icon.classList.add('done');
-      } else if (i === n) {
-        step.classList.add('active');
-        icon.classList.add('active');
-      } else {
-        icon.classList.add('waiting');
-      }
+      if (i < n) { step.classList.add('done'); icon.classList.add('done'); }
+      else if (i === n) { step.classList.add('active'); icon.classList.add('active'); }
+      else icon.classList.add('waiting');
     }
   }
-
   function setStepDone(n) {
-    const step = $('step' + n);
-    const icon = step.querySelector('.step-icon');
-    step.classList.remove('active', 'error');
-    step.classList.add('done');
-    icon.classList.remove('active', 'error', 'waiting');
-    icon.classList.add('done');
+    const step = $('step' + n), icon = step.querySelector('.step-icon');
+    step.classList.remove('active', 'error'); step.classList.add('done');
+    icon.classList.remove('active', 'error', 'waiting'); icon.classList.add('done');
   }
-
   function setStepError(n, msg) {
-    const step = $('step' + n);
-    const icon = step.querySelector('.step-icon');
-    step.classList.remove('active', 'done');
-    step.classList.add('error');
-    icon.classList.remove('active', 'done', 'waiting');
-    icon.classList.add('error');
+    const step = $('step' + n), icon = step.querySelector('.step-icon');
+    step.classList.remove('active', 'done'); step.classList.add('error');
+    icon.classList.remove('active', 'done', 'waiting'); icon.classList.add('error');
     if (msg) $('rState').innerHTML = '<span class="err">' + esc(msg) + '</span>';
   }
+  function updateStepLabel(n, text) { $('step' + n).querySelector('.step-label').textContent = text; }
 
-  function updateStepLabel(n, text) {
-    $('step' + n).querySelector('.step-label').textContent = text;
-  }
-
-  // 初期状態: ステップ1をアクティブに
   setStepActive(1);
 
-  let meta = null, received = 0, writable = null, chunks = [], chain = Promise.resolve();
+  let meta = null, sid = null, chunkSize = 61440;
+  let received = 0, writable = null, chunks = [], chain = Promise.resolve();
   let finished = false, failed = false, started = false, conn = null, retries = 0;
-  let t0 = 0, base = 0;
+  let pending = 0, pendingBytes = 0;  // 処理待ちチャンクの個数とバイト数
+  let processedSinceFlow = 0;         // 前回のflow送信以降に処理したチャンク数
+  let invalidCount = 0;               // 不正メッセージ連続カウンタ(レート制限)
+  let lastChunkAt = 0, t0 = 0, base = 0;
+  const memCap = memoryCap();
+  const timers = [];
+  const report = makeProgress(s => $('rStat').textContent = s);
+  const later = (fn, ms) => { const t = setTimeout(fn, ms); timers.push(t); return t; };
+  const clearTimers = () => { timers.forEach(clearTimeout); timers.length = 0; };
 
   const rpeer = new Peer();
-  const timeout = setTimeout(() => {
+  later(() => {
     if (!meta) {
       setStepError(1, '送信者が見つかりません');
-      $('rState').innerHTML = 'リンクの期限切れ、または送信者がタブを閉じた可能性があります。ネットワーク環境によっては直接接続できない場合もあります。';
+      $('rState').textContent = 'リンクの期限切れ、または送信者がタブを閉じた可能性があります。ネットワーク環境によっては直接接続できない場合もあります。';
     }
-  }, 20000);
+  }, CONNECT_TIMEOUT);
+
+  // 停滞タイマー(受信中にチャンクが途切れたら再接続を試みる)
+  const stallWatch = setInterval(() => {
+    if (started && !finished && !failed && Date.now() - lastChunkAt > STALL_TIMEOUT) tryReconnect();
+  }, 10000);
 
   const fail = msg => {
     if (failed || finished) return;
     failed = true;
-    const currentStep = started ? 3 : (meta ? 2 : 1);
-    setStepError(currentStep, msg);
+    clearTimers(); clearInterval(stallWatch);
+    setStepError(started ? 3 : (meta ? 2 : 1), msg);
     $('dl').classList.add('hidden');
     $('actionArea').classList.add('hidden');
     try { if (conn && conn.open) conn.send(JSON.stringify({t:'fail'})); } catch(e){}
@@ -590,122 +842,119 @@ async function initReceiver() {
 
   function tryReconnect() {
     if (finished || failed) return;
-    if (retries >= MAX_RETRY) {
-      fail('接続が切れ、再接続できませんでした。このページを再読み込みして、最初からやり直してください。');
-      return;
-    }
+    if (retries >= 5) { fail('接続が切れ、再接続できませんでした。このページを再読み込みして、最初からやり直してください。'); return; }
     retries++;
-    updateStepLabel(3, '再接続しています…(' + retries + '/' + MAX_RETRY + ')');
+    updateStepLabel(3, '再接続しています…(' + retries + '/5)');
     setStepActive(3);
-    setTimeout(() => { if (!finished && !failed && !rpeer.destroyed) connect(); }, 2000);
+    later(() => { if (!finished && !failed && !rpeer.destroyed) connect(); }, 2000);
   }
 
   rpeer.on('disconnected', () => { if (!rpeer.destroyed) { try { rpeer.reconnect(); } catch(e){} } });
-  rpeer.on('error', e => {
+  rpeer.on('error', () => {
     if (finished || failed) return;
-    if (started) { tryReconnect(); return; }
-    setStepError(1, e.type === 'peer-unavailable' ? '送信者が見つかりません(期限切れ、または終了済み)。' : '接続エラー: ' + e.type);
+    if (started) tryReconnect();
+    else if (!meta) setStepError(1, '送信者が見つかりません(期限切れ、または終了済み)。');
   });
 
   function startTransfer() {
-    started = true; t0 = Date.now(); base = received;
+    started = true; t0 = Date.now(); base = received; lastChunkAt = Date.now();
     setStepActive(3);
     updateStepLabel(3, 'ファイルを受信中…');
     $('dl').classList.add('hidden');
     $('actionArea').classList.add('hidden');
     $('rState').textContent = 'このタブを閉じないでください。';
-    conn.send(JSON.stringify({t:'start', offset: received}));
+    conn.send(JSON.stringify({t:'start', offset: received, sid: sid}));
   }
 
   async function onMeta(m) {
-    if (typeof m.d !== 'string' || m.d.length > MAX_MSG_LEN) throw verr('メタデータが不正です。');
-
-    // ステップ1完了、ステップ2をアクティブに
-    setStepDone(1);
-    updateStepLabel(1, '送信者に接続しました');
-    setStepActive(2);
-
+    if (!meta) {
+      setStepDone(1);
+      updateStepLabel(1, '送信者に接続しました');
+      setStepActive(2);
+    }
     const info = JSON.parse(dec.decode(await decrypt(key, unb64u(m.d), META_AAD)));
+    // ファイル情報・チャンクサイズ・セッションIDの厳密検証
     if (!info || typeof info.name !== 'string' || info.name.length === 0 || info.name.length > MAX_NAME_LEN ||
         !Number.isSafeInteger(info.size) || info.size < 0 || info.size > MAX_FILE_SIZE ||
-        (info.type !== undefined && typeof info.type !== 'string')) {
+        (info.type !== undefined && typeof info.type !== 'string') ||
+        !Number.isSafeInteger(info.chunk) || info.chunk < CHUNK_MIN || info.chunk > CHUNK_MAX ||
+        typeof info.sid !== 'string' || info.sid.length > 64) {
       throw verr('ファイル情報が不正です。');
     }
 
     if (!meta) {
       meta = {name: safeName(info.name), size: info.size, type: info.type || ''};
+      sid = info.sid;
+      chunkSize = info.chunk;
 
-      // ステップ2完了
+      // 保存先API未対応環境では安全サイズを上限に拒否(③メモリ制御)
+      if (meta.size > memCap) {
+        throw verr('このブラウザでは約' + fmtSize(memCap) + 'を超えるファイルは安全に受信できません。PCのChrome/Edgeをお使いください。');
+      }
+
       setStepDone(2);
       updateStepLabel(2, 'ファイル情報を検証しました');
-
-      // ファイル情報を表示
       $('fileInfo').classList.remove('hidden');
       $('rName').textContent = meta.name;
       $('rSize').textContent = fmtSize(meta.size);
-
-      // ダウンロードボタンを表示
       $('rState').textContent = '受信の準備ができました。ボタンを押すと保存先を選んで開始します。';
       $('dl').classList.remove('hidden');
       $('actionArea').classList.remove('hidden');
-    } else if (meta.size !== info.size) {
-      throw verr('再接続先のファイルが元のファイルと一致しません。');
+    } else {
+      // 再接続: 同一転送であることの検証(②整合性)
+      if (sid !== info.sid || meta.size !== info.size || chunkSize !== info.chunk) {
+        throw verr('再接続先のファイルが元の転送と一致しません。');
+      }
     }
-
-    clearTimeout(timeout);
-
-    // 再接続の場合は自動的に再開
-    if (started) {
-      retries = 0;
-      startTransfer();
-    }
+    clearTimers();
+    if (started) { retries = 0; startTransfer(); }
   }
 
   async function onChunk(buf) {
     if (failed || finished) return;
-    const idx = Math.floor(received / CHUNK);
-    const plain = await decrypt(key, buf, chunkAad(idx));
+    const idx = Math.floor(received / chunkSize);
+    const plain = await decrypt(key, buf, chunkAad(chunkSize, idx));
     if (received + plain.byteLength > meta.size) throw verr('受信データが予定サイズを超えました。');
+    // メモリ蓄積の監視(実測バイトベース。上限超過時は即失敗)
+    if (!writable && received + plain.byteLength > memCap) throw verr('メモリ不足のため受信を中止しました。');
     if (writable) await writable.write(plain); else chunks.push(plain);
     received += plain.byteLength;
+    pendingBytes -= buf.byteLength;
+    lastChunkAt = Date.now();
+    // 一定量処理したら送信側のウィンドウを解放(バックプレッシャー)
+    if (++processedSinceFlow >= FLOW_ACK_EVERY && conn && conn.open) {
+      processedSinceFlow = 0;
+      try { conn.send(JSON.stringify({t:'flow', n: received})); } catch(e){}
+    }
     $('rBar').style.width = (meta.size ? received / meta.size * 100 : 100) + '%';
-    $('rStat').textContent = Math.floor(received / meta.size * 100) + '% 完了';
-    $('rEta').textContent = progressText('', received, meta.size, base, t0).replace(/^.*?%\(|\).*$/g, '').trim();
+    report('受信中', received, meta.size, base, t0, received === meta.size);
   }
 
   async function finish(m) {
     if (!meta || !started) throw verr('転送が開始されていません。');
+    if (m.sid !== sid) throw verr('転送セッションが一致しません。最初からやり直してください。');
     if (m.size !== meta.size || received !== meta.size) {
       throw verr('受信サイズが一致しません(' + fmtSize(received) + ' / ' + fmtSize(meta.size) + ')。最初からやり直してください。');
     }
-
     $('rState').textContent = '検証・保存しています…';
-
-    if (writable) {
-      await writable.close();
-      writable = null;
-    } else {
+    if (writable) { await writable.close(); writable = null; }
+    else {
       const blob = new Blob(chunks, {type: meta.type || 'application/octet-stream'});
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = meta.name;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      a.href = URL.createObjectURL(blob); a.download = meta.name;
+      document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(a.href), 60000);
       chunks = [];
     }
-
     finished = true;
+    clearTimers(); clearInterval(stallWatch);
     setStepDone(3);
     updateStepLabel(3, '受信・検証が完了しました');
     $('rBar').style.width = '100%';
     $('rStat').textContent = '100% 完了';
-    $('rEta').textContent = '';
     $('rState').innerHTML = '<span class="ok">ファイルの受信が完了しました</span>';
     $('dl').classList.add('hidden');
     $('actionArea').classList.add('hidden');
-
     try { conn.send(JSON.stringify({t:'ack'})); } catch(e){}
     setTimeout(() => { try { rpeer.destroy(); } catch(e){} }, 1500);
   }
@@ -715,24 +964,39 @@ async function initReceiver() {
     try {
       if (typeof raw === 'string') {
         const m = parseMsg(raw);
-        if (!m) return;
+        if (!m) {
+          // 不正メッセージの連続受信にレート制限
+          if (++invalidCount > 10) fail('不正な通信データを繰り返し受信しました。接続を中止します。');
+          return;
+        }
+        invalidCount = 0;
         if (m.t === 'meta') {
           chain = chain.then(() => onMeta(m)).catch(e => fail(e.userMsg || '復号に失敗しました。URLが途中で切れている可能性があります。'));
         } else if (m.t === 'busy') {
           setStepError(2, '送信者は別の相手に送信中です。少し待ってからやり直してください。');
+        } else if (m.t === 'ended') {
+          fail('送信者が共有を終了しました。');
         } else if (m.t === 'fail') {
           fail('送信者側でエラーが発生しました。もう一度やり直してください。');
         } else if (m.t === 'done') {
+          if (finished) return;   // doneの重複受信は無視
+          if (!started) { fail('転送開始前に完了通知が届きました。やり直してください。'); return; } // 順序検証
           chain = chain.then(() => finish(m)).catch(e => fail(e.userMsg || '保存に失敗しました。'));
         }
         return;
       }
       if (!meta || !started) return;
+      // キュー深度の制限(個数とバイト数の両方。処理が追いつかない場合は失敗)
+      pendingBytes += (raw instanceof ArrayBuffer) ? raw.byteLength : (ArrayBuffer.isView(raw) ? raw.byteLength : 0);
+      if (++pending > MAX_PENDING_CHUNKS || pendingBytes > MAX_PENDING_BYTES) {
+        fail('受信バッファが上限に達しました。ネットワーク環境を確認してやり直してください。');
+        return;
+      }
       let buf;
       if (raw instanceof ArrayBuffer) buf = raw;
       else if (ArrayBuffer.isView(raw)) buf = raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength);
-      else return;
-      chain = chain.then(() => onChunk(buf)).catch(e => fail(e.userMsg || 'データの検証に失敗しました。'));
+      else { pending--; return; }
+      chain = chain.then(() => onChunk(buf)).catch(e => fail(e.userMsg || 'データの検証に失敗しました。')).then(() => { pending--; });
     } catch (e) {
       fail('想定外のデータを受信しました。');
     }
@@ -745,41 +1009,24 @@ async function initReceiver() {
     c.on('error', () => {});
     c.on('close', () => {
       if (c !== conn || finished || failed) return;
-      if (started) {
-        tryReconnect();
-      } else if (!meta) {
-        setStepError(1, '送信者との接続が切れました');
-        $('rState').textContent = 'ページを再読み込みしてください。';
-      }
+      if (started) tryReconnect();
+      else if (!meta) { setStepError(1, '送信者との接続が切れました'); $('rState').textContent = 'ページを再読み込みしてください。'; }
     });
   }
 
   rpeer.on('open', connect);
 
-  // ダウンロードボタンクリック
   $('dl').onclick = async () => {
     if (!meta || started) return;
     $('dl').disabled = true;
     $('dl').textContent = '準備中…';
-
-    if (window.showSaveFilePicker) {
+    if (window.showSaveFilePicker && window.isSecureContext) {
       try {
         const h = await window.showSaveFilePicker({suggestedName: meta.name});
         writable = await h.createWritable();
-      } catch (e) {
-        $('dl').disabled = false;
-        $('dl').textContent = 'ダウンロード開始';
-        return;
-      }
-    } else if (meta.size > 1.5 * 1024 * 1024 * 1024) {
-      $('rState').innerHTML = '<span class="err">このブラウザでは約1.5GBを超えるファイルは受信できません。PCのChrome/Edgeをお使いください。</span>';
-      $('dl').disabled = false;
-      $('dl').textContent = 'ダウンロード開始';
-      return;
+      } catch (e) { $('dl').disabled = false; $('dl').textContent = 'ダウンロード開始'; return; }
     }
-
     try {
-      // 進捗エリアを表示
       $('progressArea').classList.remove('hidden');
       startTransfer();
     } catch (e) {
@@ -787,7 +1034,7 @@ async function initReceiver() {
     }
   };
 }
-})();
+}
 </script>
 </body>
 </html>
