@@ -17,7 +17,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com; style-src 'unsafe-inline'; connect-src 'self' https://0.peerjs.com wss://0.peerjs.com; img-src 'self' data: blob:; media-src blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>DropBig - 登録不要のP2Pファイル転送</title>
 <style>
-:root{color-scheme:dark;--bg:#000;--text:#4176E6;--sub:#b3b7c2;--line:#262626;--accent:#3b6ef5;--accent2:#6b7cf0;--icon:#6f8cff;--ok:#32d583;--err:#f97066;--scale:0.78}
+:root{color-scheme:dark;--bg:#000;--text:#4176E6;--sub:#b3b7c2;--line:#262626;--accent:#3b6ef5;--accent2:#6b7cf0;--icon:#6f8cff;--ok:#32d583;--err:#f97066;--scale:0.78;--st-wait:#7d8590;--st-active:#6f8cff;--st-done:#32d583;--st-error:#f97066}
 *{box-sizing:border-box,forced-color-adjust:none}
 *{box-sizing:border-box;forced-color-adjust:none}
 body{margin:0;font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:16px;font-size:14px}
@@ -96,12 +96,9 @@ button:disabled{opacity:.5;cursor:default}
   .bar{height:9px}
   #qr img,#qr canvas{padding:8px;border-radius:8px}
   .file-info{padding:14px;gap:14px}
-  .file-icon{width:36px;height:36px}
+
   .file-details .fname{font-size:16px}
-  .step-icon{width:22px;height:22px}
-  .step-icon.waiting::after,.step-icon.active::after{inset:7px}
-  .step-icon.done::after{font-size:13px}
-  .step-icon.error::after{font-size:11px}
+  .step-icon,.step-icon svg{width:22px;height:22px}
   .step-label{font-size:14px}
   #dl{padding:14px 20px;font-size:16px}
   .features{grid-template-columns:1fr;gap:10px;margin-top:22px;padding-top:16px}
@@ -111,42 +108,49 @@ button:disabled{opacity:.5;cursor:default}
   .feature-card p{font-size:11px;line-height:16px}
 }
 
-/* 受信画面 - ステップ表示 */
-.steps{display:flex;flex-direction:column;gap:0;margin-bottom:14px}
-.step{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+/* 接続ステップ(送信・受信で共通の見た目)。
+   状態は .step の data-state で指定: wait(灰) / active(青・回転) / done(緑) / error(赤)。
+   アイコンはSVG、配色は --st-* 変数に集約し、完了パネル・エラーバナーと同色。 */
+.steps{display:flex;flex-direction:column;gap:0;margin-bottom:14px;counter-reset:stepno}
+.step{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line)}
 .step:last-child{border-bottom:none}
-.step-icon{width:18px;height:18px;border-radius:50%;flex:none;position:relative}
-.step-icon.waiting{background:var(--line)}
-.step-icon.active{background:var(--accent);animation:pulse 1.5s ease-in-out infinite}
-.step-icon.done{background:var(--ok)}
-.step-icon.error{background:var(--err)}
-.step-icon.waiting::after{content:'';position:absolute;inset:6px;background:var(--sub);border-radius:50%}
-.step-icon.active::after{content:'';position:absolute;inset:6px;background:#fff;border-radius:50%}
-.step-icon.done::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700}
-.step-icon.error::after{content:'✕';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
+.step-icon{width:20px;height:20px;flex:none;display:inline-flex;align-items:center;justify-content:center}
+.step-icon svg{width:20px;height:20px;display:none}
+.step[data-state="wait"] .ic-wait{display:block}
+.step[data-state="active"] .ic-active{display:block}
+.step[data-state="done"] .ic-done{display:block}
+.step[data-state="error"] .ic-error{display:block}
+.step[data-state="active"]{color:var(--st-active)}
+.step[data-state="active"] .step-icon{animation:pulse 1.5s ease-in-out infinite,spin 1s linear infinite;transform-origin:50% 50%}
+.step[data-state="done"]{color:var(--st-done)}
+.step[data-state="error"]{color:var(--st-error)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes spin{to{transform:rotate(360deg)}}
 .step-body{flex:1;min-width:0}
-.step-sub{margin-top:2px;color:var(--sub);font-size:11px;line-height:16px}
-.step-badge{flex:none;font-size:10px;font-weight:700;padding:3px 10px;border-radius:999px;border:1px solid var(--line);color:var(--sub);white-space:nowrap}
-.step-badge.active{border-color:var(--accent2);color:var(--icon);background:rgba(107,124,240,.12)}
-.step-badge.done{border-color:var(--ok);color:var(--ok);background:rgba(50,213,131,.08)}
-.step-badge.error{border-color:var(--err);color:var(--err);background:rgba(249,112,102,.08)}
+.step-sub{margin-top:3px;color:var(--sub);font-size:12px;line-height:17px}
 .conn-steps{margin-bottom:16px}
-.step-label{flex:1;color:var(--sub);font-size:12px}
-.step.active .step-label{color:var(--text);font-weight:600}
-.step.done .step-label{color:var(--ok)}
-.step.error .step-label{color:var(--err)}
+.step-label{flex:1;color:var(--sub);font-size:13px;font-weight:600}
+.step-label::before{counter-increment:stepno;content:counter(stepno) ". ";font-weight:700}
+.step[data-state="active"] .step-label{color:var(--text)}
+.step[data-state="done"] .step-label{color:var(--st-done)}
+.step[data-state="error"] .step-label{color:var(--st-error)}
 
 /* ファイル情報 */
 .file-info{display:flex;align-items:center;gap:12px;padding:12px;background:rgba(107,124,240,.08);border:1px solid var(--line);border-radius:10px;margin-bottom:12px}
-.head-file{margin-bottom:14px;background:transparent}
+/* 共有ファイルのコンパクトな情報カード(アイコンタイル+2行テキスト+確認ノート) */
+.file-card{border:1px solid var(--line);border-radius:12px;margin-bottom:14px;overflow:hidden}
+.file-row{display:flex;align-items:center;gap:12px;padding:12px 14px}
+.file-ic{width:38px;height:38px;flex:none;border-radius:10px;background:rgba(111,140,255,.12);color:var(--icon);display:inline-flex;align-items:center;justify-content:center}
+.file-ic svg{width:20px;height:20px}
+.file-note{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid var(--line);color:var(--sub);font-size:12px;line-height:18px}
+.file-note svg{width:15px;height:15px;flex:none;color:var(--st-done)}
 .fc-check{flex:none;width:22px;height:22px;color:var(--ok);display:inline-flex}
 .fc-check.hidden{display:none}
 .fc-check>span{display:inline-flex;width:100%;height:100%}
 .fc-check svg{width:100%;height:100%}
-.file-icon{width:30px;height:30px;color:var(--icon);flex:none}
-.file-icon svg{width:100%;height:100%}
-.file-details{min-width:0}
+.file-icon{width:38px;height:38px;border-radius:10px;background:rgba(111,140,255,.12);color:var(--icon);flex:none;display:inline-flex;align-items:center;justify-content:center}
+.file-icon svg{width:20px;height:20px}
+.file-details{flex:1;min-width:0}
 .file-details .fname{font-size:14px;margin-bottom:3px}
 
 /* 進捗 */
@@ -163,7 +167,8 @@ button:disabled{opacity:.5;cursor:default}
 #dl{width:100%;padding:10px 16px;font-size:13px}
 
 @media (max-width:520px){
-  .step-label{font-size:11px}
+  .step-label{font-size:12px}
+  .step-sub{font-size:12px}
   .file-info{padding:10px}
 }
 
@@ -192,17 +197,28 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
   .lead{font-size:14px}
 }
 
-/* 共有カード: 画面幅に応じた自動レイアウト(721px以上でQRと接続情報を左右に並べる) */
-.share-grid{display:block}
+/* QRカード: QRコードと有効期限を1枚のカードにまとめて中央配置 */
+.share-qr-card{border:1px solid var(--line);border-radius:12px;padding:18px 16px 16px;text-align:center;background:rgba(107,124,240,.04);margin-top:14px}
+.qr-card-title{font-size:15px;font-weight:700;color:var(--text);line-height:1.5}
+.qr-card-sub{margin:6px 0 4px;color:var(--sub);font-size:12px;line-height:18px}
+.share-qr-card #qr{margin:14px 0 4px}
+.share-qr-card #qr img.qr-img{width:min(320px,100%)}
+.share-expire{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;color:var(--sub);font-size:12px;line-height:18px}
+.share-expire svg{width:14px;height:14px;flex:none;color:var(--icon)}
 .share-url-label{margin:14px 0 6px}
-.share-expire{margin-top:4px}
-@media (min-width:721px){
-  .share-grid{display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px;align-items:start;margin-top:6px}
-  .share-qr{width:216px;flex:none}
-  .share-qr #qr img.qr-img{width:100%}
-  .share-expire{text-align:center}
-  .share-url-label{margin:0 0 6px}
-}
+
+/* 接続待機パネル: 待機中は転送進捗(確定値)の代わりに表示。
+   不定形のスライドバーで「進捗が止まっている」と誤解されにくくする。 */
+.wait-panel{margin-top:14px;border:1px solid var(--line);border-radius:12px;padding:16px;background:rgba(107,124,240,.04)}
+.wait-head{display:flex;align-items:center;gap:12px}
+.wait-icon{width:38px;height:38px;flex:none;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:rgba(111,140,255,.14);color:var(--icon)}
+.wait-icon svg{width:20px;height:20px}
+.wait-title{font-size:15px;font-weight:700;color:var(--text);line-height:1.4}
+.wait-sub{margin-top:2px;color:#c4c8d0;font-size:12px;line-height:18px}
+.wait-panel .bar{margin-top:14px}
+.bar.indet>i{width:35%;animation:indet 1.4s ease-in-out infinite}
+@keyframes indet{0%{margin-left:0}50%{margin-left:65%}100%{margin-left:0}}
+.wait-foot{margin-top:8px;color:var(--sub);font-size:11px;line-height:16px}
 
 /* タッチデバイス・狭い画面: 押しやすいボタンサイズ(44px以上) */
 @media (max-width:720px){
@@ -216,7 +232,7 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
 /* 転送進捗の強調表示 */
 .pct{font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;flex:none;min-width:44px;text-align:right}
 #sSizes,#rSizes{margin-top:2px}
-.done-panel{display:flex;align-items:center;gap:10px;margin-top:12px;padding:12px 14px;border:1px solid var(--ok);border-radius:10px;background:rgba(50,213,131,.08);color:var(--ok);font-size:14px;font-weight:600;line-height:1.5}
+.done-panel{display:flex;align-items:center;gap:10px;margin-top:12px;padding:12px 14px;border:1px solid var(--st-done);border-radius:10px;background:rgba(50,213,131,.08);color:var(--st-done);font-size:14px;font-weight:600;line-height:1.5}
 .done-panel.hidden{display:none}
 .done-panel svg{width:22px;height:22px;flex:none}
 
@@ -253,7 +269,7 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
 #qrClose:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 
 /* 画面内バナー(alertの代わり) */
-.banner{margin:14px 0 0;padding:10px 14px;border-radius:8px;font-size:13px;line-height:1.6;border:1px solid var(--err);color:#ffd9d9;background:rgba(249,112,102,.1)}
+.banner{margin:14px 0 0;padding:10px 14px;border-radius:8px;font-size:13px;line-height:1.6;border:1px solid var(--st-error);color:#ffd9d9;background:rgba(249,112,102,.1)}
 .banner.info{color:#cfe3ff;background:rgba(59,110,245,.12);border-color:var(--accent2)}
 .banner.hidden{display:none}
 
@@ -350,47 +366,74 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
     </div>
 
     <div class="card hidden" id="shareCard">
-      <div class="file-info head-file">
-        <div class="file-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg></div>
-        <div class="file-details">
-          <div class="fname" id="sName"></div>
-          <div class="small" id="sSize"></div>
+      <div class="file-card">
+        <div class="file-row">
+          <span class="file-ic" id="sFileIc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg></span>
+          <div class="file-details">
+            <div class="fname" id="sName"></div>
+            <div class="small" id="sSize"></div>
+          </div>
+          <span class="fc-check hidden" id="sCheck" aria-label="転送完了"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg></span></span>
         </div>
-        <span class="fc-check hidden" id="sCheck" aria-label="転送完了"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg></span></span>
+        <div class="file-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg><span>共有するファイルを確認してください</span></div>
       </div>
       <div class="steps conn-steps" id="sSteps" aria-live="polite">
-        <div class="step" id="sst1">
-          <div class="step-icon waiting"></div>
+<div class="step" id="sst1" data-state="wait">
+          <span class="step-icon" aria-hidden="true">
+            <svg class="ic-wait" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/></svg>
+            <svg class="ic-active" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5" stroke-dasharray="42 12"/></svg>
+            <svg class="ic-done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="m8.3 12.3 2.5 2.5 4.9-5.1"/></svg>
+            <svg class="ic-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
+          </span>
           <div class="step-body">
-            <div class="step-label">サーバーに接続中…</div>
-            <div class="small step-sub">共有リンクを発行しています。</div>
+            <div class="step-label">共有を準備</div>
+            <div class="small step-sub">現在このステップを処理中</div>
           </div>
-          <span class="step-badge" id="ssb1">待機中</span>
         </div>
-        <div class="step" id="sst2">
-          <div class="step-icon waiting"></div>
+        <div class="step" id="sst2" data-state="wait">
+          <span class="step-icon" aria-hidden="true">
+            <svg class="ic-wait" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/></svg>
+            <svg class="ic-active" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5" stroke-dasharray="42 12"/></svg>
+            <svg class="ic-done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="m8.3 12.3 2.5 2.5 4.9-5.1"/></svg>
+            <svg class="ic-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
+          </span>
           <div class="step-body">
-            <div class="step-label">相手の接続を待っています</div>
-            <div class="small step-sub">相手がQRコードを読み取ると接続を開始します。</div>
+            <div class="step-label">相手と接続</div>
+            <div class="small step-sub">相手の接続を待っています</div>
           </div>
-          <span class="step-badge" id="ssb2">待機中</span>
         </div>
-        <div class="step" id="sst3">
-          <div class="step-icon waiting"></div>
+        <div class="step" id="sst3" data-state="wait">
+          <span class="step-icon" aria-hidden="true">
+            <svg class="ic-wait" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/></svg>
+            <svg class="ic-active" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5" stroke-dasharray="42 12"/></svg>
+            <svg class="ic-done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="m8.3 12.3 2.5 2.5 4.9-5.1"/></svg>
+            <svg class="ic-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
+          </span>
           <div class="step-body">
-            <div class="step-label">ファイル転送</div>
-            <div class="small step-sub">相手がダウンロードを開始すると転送します。</div>
+            <div class="step-label">ファイルを転送</div>
+            <div class="small step-sub">接続後に開始</div>
           </div>
-          <span class="step-badge" id="ssb3">待機中</span>
         </div>
       </div>
-      <div class="share-grid">
-        <div class="share-qr">
-          <div id="qr"></div>
-          <div class="small qr-hint hidden" id="qrHint">QRコードをタップすると拡大表示します</div>
-          <div class="small share-expire" id="expire"></div>
+      <div class="wait-panel hidden" id="waitPanel">
+        <div class="wait-head">
+          <span class="wait-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h.01"/><path d="M8.5 16.4a5 5 0 0 1 7 0"/><path d="M5 12.9a10 10 0 0 1 14 0"/><path d="M1.5 9.3a15 15 0 0 1 21 0"/></svg></span>
+          <div>
+            <div class="wait-title">相手を待っています</div>
+            <div class="small wait-sub" id="waitSub">共有URLを相手に送信してください。</div>
+          </div>
         </div>
-        <div class="share-info">
+        <div class="bar indet" role="progressbar" aria-label="接続待機中"><i></i></div>
+        <div class="small wait-foot">接続待機中 - この画面を開いたままお待ちください</div>
+      </div>
+      <div class="share-qr-card">
+        <div class="qr-card-title">相手に接続してもらいましょう</div>
+        <div class="small qr-card-sub">スマートフォンのカメラでQRコードを読み取ってください。</div>
+        <div id="qr"></div>
+        <div class="small qr-hint hidden" id="qrHint">QRコードをタップすると拡大表示します</div>
+        <div class="share-expire"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="expire"></span></div>
+      </div>
+      <div class="share-info">
           <div class="small share-url-label">この URL を相手に送ってください</div>
           <div class="row url-row"><input type="text" class="url" id="link" readonly aria-label="共有URL"><button id="copy" class="btn-copy" aria-label="共有URLをコピー"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><span>コピー</span></button></div>
           <div class="small pin-row">PIN: <b id="sPin"></b><br>リンクにPINも含まれています。安全のため、リンクとは別の手段でPINだけ伝える使い方もできます。</div>
@@ -407,7 +450,6 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
           <div class="small" style="margin-top:10px">完了と表示されるまで、このタブを開いたままにしてください。有効期限もこのタブが開いている間だけ有効です。</div>
           <div class="small" style="margin-top:6px;color:#e0a75e">この URL には復号鍵とPINが含まれています。信頼できる相手のみに送り、公開掲示板等には貼らないでください。</div>
         </div>
-      </div>
       <div class="share-actions"><button class="sec" id="stop" aria-label="共有を終了"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></svg><span id="stopLabel">共有を終了</span></button></div>
     </div>
   </section>
@@ -417,26 +459,41 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
     <div class="card">
       <!-- ステップ表示 -->
       <div class="steps" id="rSteps">
-        <div class="step" id="step1">
-          <div class="step-icon waiting"></div>
-          <div class="step-label">送信者に接続中…</div>
-          <span class="step-badge" id="rb1">待機中</span>
+<div class="step" id="step1" data-state="wait">
+          <span class="step-icon" aria-hidden="true">
+            <svg class="ic-wait" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/></svg>
+            <svg class="ic-active" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5" stroke-dasharray="42 12"/></svg>
+            <svg class="ic-done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="m8.3 12.3 2.5 2.5 4.9-5.1"/></svg>
+            <svg class="ic-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
+          </span>
+          <div class="step-label">相手と接続</div>
+          <div class="small step-sub">送信者のページが開いている必要があります</div>
         </div>
-        <div class="step" id="step2">
-          <div class="step-icon waiting"></div>
-          <div class="step-label">ファイル情報を検証中…</div>
-          <span class="step-badge" id="rb2">待機中</span>
+        <div class="step" id="step2" data-state="wait">
+          <span class="step-icon" aria-hidden="true">
+            <svg class="ic-wait" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/></svg>
+            <svg class="ic-active" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5" stroke-dasharray="42 12"/></svg>
+            <svg class="ic-done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="m8.3 12.3 2.5 2.5 4.9-5.1"/></svg>
+            <svg class="ic-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
+          </span>
+          <div class="step-label">ファイルを検証</div>
+          <div class="small step-sub">ファイル名とサイズを確認します</div>
         </div>
-        <div class="step" id="step3">
-          <div class="step-icon waiting"></div>
-          <div class="step-label">ファイルを受信中…</div>
-          <span class="step-badge" id="rb3">待機中</span>
+        <div class="step" id="step3" data-state="wait">
+          <span class="step-icon" aria-hidden="true">
+            <svg class="ic-wait" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/></svg>
+            <svg class="ic-active" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5" stroke-dasharray="42 12"/></svg>
+            <svg class="ic-done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="m8.3 12.3 2.5 2.5 4.9-5.1"/></svg>
+            <svg class="ic-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
+          </span>
+          <div class="step-label">ファイルを受信</div>
+          <div class="small step-sub">受信開始を待っています</div>
         </div>
       </div>
 
       <!-- ファイル情報 -->
       <div class="file-info hidden" id="fileInfo">
-        <div class="file-icon">
+        <div class="file-icon" id="rFileIc">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg>
         </div>
         <div class="file-details">
@@ -714,7 +771,23 @@ function peerOptions(id){
 
 const fmtSize = n => n < 1024 ? n + ' B' : n < 1048576 ? (n/1024).toFixed(1) + ' KB' : n < 1073741824 ? (n/1048576).toFixed(1) + ' MB' : (n/1073741824).toFixed(2) + ' GB';
 const fmtEta = s => !isFinite(s) ? '' : s < 60 ? Math.ceil(s) + '秒' : Math.floor(s/60) + '分' + String(Math.ceil(s%60)).padStart(2,'0') + '秒';
-const typeLabel = t => !t ? 'ファイル' : t.indexOf('image/') === 0 ? '画像' : t.indexOf('video/') === 0 ? '動画' : t.indexOf('audio/') === 0 ? '音声' : t.indexOf('text/') === 0 ? 'テキスト' : t === 'application/pdf' ? 'PDF' : /zip|compressed/.test(t) ? 'ZIP' : 'ファイル';
+const typeLabel = t => {
+  if (!t) return 'ファイル';
+  const tag = t.indexOf('image/') === 0 ? '画像' : t.indexOf('video/') === 0 ? '動画' : t.indexOf('audio/') === 0 ? '音声' : t.indexOf('text/') === 0 ? 'テキスト' : t === 'application/pdf' ? 'PDF' : /zip|compressed/.test(t) ? 'ZIP' : '';
+  if (!tag) return 'ファイル';
+  if (tag === '画像' || tag === '動画' || tag === '音声') {
+    const ext = (t.split('/')[1] || '').split(/[;+]/)[0].toUpperCase();
+    return ext ? ext + tag : tag;
+  }
+  return tag;
+};
+const FILE_ICONS = {
+  image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2.5"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15.5-4.5-4.5L6 21.5"/></svg>',
+  video: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="12" height="12" rx="2.5"/><path d="m15 10 5.5-3v10L15 14"/></svg>',
+  audio: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v11.5"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="15.5" r="2.5"/></svg>',
+  file: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg>'
+};
+const fileIcon = t => !t ? FILE_ICONS.file : t.indexOf('image/') === 0 ? FILE_ICONS.image : t.indexOf('video/') === 0 ? FILE_ICONS.video : t.indexOf('audio/') === 0 ? FILE_ICONS.audio : FILE_ICONS.file;
 const b64u = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 const unb64u = s => Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')), c => c.charCodeAt(0));
 const randId = () => 'db-' + Array.from(crypto.getRandomValues(new Uint8Array(10)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join('');
@@ -946,6 +1019,7 @@ async function startShare(files) {
     $('shareCard').classList.remove('hidden');
     $('sName').textContent = curFileLabel();
     $('sSize').textContent = fmtSize(curFile.size) + ' · ' + typeLabel(curFile.type);
+    $('sFileIc').innerHTML = fileIcon(curFile.type);
     $('sPin').textContent = curPin;
     $('sCheck').classList.add('hidden');
     $('sBar').style.width = '0';
@@ -954,35 +1028,37 @@ async function startShare(files) {
     $('sSizes').textContent = '';
     $('sDone').classList.add('hidden');
     $('sStat').textContent = 'サーバーに接続中…';
-    sStep(1, 'active', 'サーバーに接続中…', '共有リンクを発行しています。');
-    sStep(2, 'wait', '相手の接続を待っています', '相手がQRコードを読み取ると接続を開始します。');
-    sStep(3, 'wait', 'ファイル転送', '相手がダウンロードを開始すると転送します。');
+    sStep(1, 'active', '共有を準備', '現在このステップを処理中');
+    sStep(2, 'wait', '相手と接続', '相手の接続を待っています');
+    sStep(3, 'wait', 'ファイルを転送', '接続後に開始');
+    showWaitPanel(true);
 
     peer = new Peer(peerOptions(id));
     const myPeer = peer;
     const connectTimer = setTimeout(() => {
-      if (peer === myPeer && !opened) { sStep(1, 'error', 'サーバーに接続できませんでした', 'ネットワークを確認してやり直してください。'); stopShare('サーバーに接続できませんでした。ネットワークを確認してやり直してください。'); }
+      if (peer === myPeer && !opened) { sStep(1, 'error', '共有の準備に失敗しました', 'ネットワークを確認してやり直してください'); stopShare('サーバーに接続できませんでした。ネットワークを確認してやり直してください。'); }
     }, CONNECT_TIMEOUT);
     peer.on('open', () => {
       opened = true; clearTimeout(connectTimer);
-      sStep(1, 'done', 'サーバーに接続しました', '共有リンクを発行しました。');
-      sStep(2, 'active');
+      sStep(1, 'done', '共有の準備が完了', 'ファイルの選択が完了');
+      sStep(2, 'active', '相手と接続', '現在このステップを処理中');
       const url = location.origin + location.pathname + '#' + id + '.' + rawKey + '.' + curPin;
       $('link').value = url;
       renderShareQR(url);
-      $('sStat').textContent = '相手の接続を待っています…';
+      showWaitPanel(true);
       const mins = ttlMins;
       const endAt = Date.now() + mins * 60000;
       expireTimer = setTimeout(() => stopShare('有効期限が切れました。'), mins * 60000);
       countTimer = setInterval(() => {
         const s = Math.max(0, Math.round((endAt - Date.now())/1000));
-        $('expire').textContent = '残り ' + Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+        const m = Math.floor(s/60);
+        $('expire').textContent = 'QRコードの有効期限：' + (m >= 60 ? Math.floor(m/60) + '時間' + String(m%60).padStart(2,'0') + '分' : m + '分' + (s%60) + '秒');
       }, 500);
     });
     peer.on('disconnected', () => { if (peer === myPeer && !myPeer.destroyed) { try { myPeer.reconnect(); } catch(e){} } });
     peer.on('error', e => {
       if (peer !== myPeer) return;
-      if (!opened) { clearTimeout(connectTimer); sStep(1, 'error', '接続エラーが発生しました', 'もう一度お試しください。'); stopShare('接続エラーが発生しました。もう一度お試しください。'); return; }
+      if (!opened) { clearTimeout(connectTimer); sStep(1, 'error', '共有の準備に失敗しました', 'もう一度お試しください'); stopShare('接続エラーが発生しました。もう一度お試しください。'); return; }
       $('sStat').innerHTML = '<span class="err">接続エラーが発生しました。</span>';
     });
     peer.on('connection', conn => onSenderConn(conn));
@@ -995,25 +1071,29 @@ async function startShare(files) {
   }
 }
 
-/* 送信側接続ステップ: state = active | wait | done | error */
-/* badge: done時のバッジ文言(省略時は「接続済み」) */
-function sStep(n, state, title, sub, badge) {
-  const step = $('sst' + n), icon = step.querySelector('.step-icon'), b = $('ssb' + n);
-  step.classList.remove('active', 'done', 'error');
-  icon.classList.remove('active', 'done', 'error', 'waiting');
-  b.className = 'step-badge';
-  if (state === 'done') {
-    step.classList.add('done'); icon.classList.add('done');
-    b.classList.add('done'); b.textContent = badge || '接続済み';
-  } else if (state === 'error') {
-    step.classList.add('error'); icon.classList.add('error');
-    b.classList.add('error'); b.textContent = 'エラー';
-  } else if (state === 'wait') {
-    icon.classList.add('waiting'); b.textContent = '待機中';
-  } else {
-    step.classList.add('active'); icon.classList.add('active');
-    b.classList.add('active'); b.textContent = '接続中';
-  }
+/* ---------- 接続ステップの状態表示(送信・受信で共通) ----------
+   状態は data-state で統一: wait(灰) / active(青・回転) / done(緑) / error(赤)。
+   アイコンはSVG、配色は --st-* 変数に集約。 */
+function setStepState(step, state) {
+  if (step) step.dataset.state = state;
+}
+
+/* ---------- 接続待機パネル ----------
+   待機中は転送進捗(確定値のバー・%表示)を隠し、不定形バーの待機パネルを表示する。
+   これにより「転送が0%で止まっている」と誤解されるのを防ぐ。 */
+function showWaitPanel(on, sub) {
+  $('waitPanel').classList.toggle('hidden', !on);
+  $('sBar').parentElement.classList.toggle('hidden', on);
+  $('sStat').parentElement.classList.toggle('hidden', on);
+  $('sSizes').classList.toggle('hidden', on);
+  if (on && sub) $('waitSub').textContent = sub;
+}
+
+/* 送信側接続ステップ: state = wait | active | done | error
+   badge: done時のバッジ文言(省略時は「接続済み」) */
+function sStep(n, state, title, sub) {
+  const step = $('sst' + n);
+  setStepState(step, state);
   if (title) step.querySelector('.step-label').textContent = title;
   if (sub !== undefined) step.querySelector('.step-sub').textContent = sub;
 }
@@ -1063,14 +1143,15 @@ async function acceptConn(conn) {
       if (senderState === 'claimed') {
         try { if (conn.open) conn.close(); } catch(e){}
         releaseSlot();
-        sStep(2, 'active', '相手の接続を待っています', '相手が応答しなかったため、別の接続を待っています。');
-        $('sStat').textContent = '相手が応答しなかったため、別の接続を待っています…';
+        sStep(2, 'active', '相手と接続', '相手が応答しなかったため、別の接続を待っています');
+        showWaitPanel(true, '相手が応答しなかったため、別の接続を待っています');
       }
     }, CLAIM_TIMEOUT);
 
+    showWaitPanel(false);
     $('sStat').textContent = '相手が接続しました。相手の操作を待っています…';
-    sStep(2, 'done', '相手と接続しました', 'ファイル転送を開始できます。');
-    sStep(3, 'wait', 'ファイル転送', '相手がダウンロードを開始すると転送します。');
+    sStep(2, 'done', '相手と接続しました', '接続が確立されました');
+    sStep(3, 'wait', 'ファイルを転送', '接続後に開始');
     await sendMetaTo(conn);
   } catch (e) { /* close側で処理 */ }
 }
@@ -1140,9 +1221,11 @@ function onSenderConn(conn) {
       slotConn = null;
       if (senderState === 'sending' || senderState === 'waitack') {
         senderState = 'claimed';   // 再接続待ち
+        showWaitPanel(true, '再接続を待っています。相手のページを開いたままにしてください。');
         $('sStat').innerHTML = '<span class="err">相手との接続が切れました。相手のページを開いたままなら自動で再開を試みます。</span>';
       } else if (senderState === 'claimed') {
         senderState = 'idle';
+        showWaitPanel(true, '共有URLを相手に送信してください。');
         $('sStat').textContent = '相手の接続を待っています…';
       }
     }
@@ -1152,7 +1235,8 @@ function onSenderConn(conn) {
 
 async function sendFile(conn, offset) {
   senderState = 'sending';
-  sStep(3, 'active', 'ファイルを送信中…');
+  sStep(3, 'active', 'ファイルを転送', '現在このステップを処理中');
+  showWaitPanel(false);
   const file = curFile, key = curKey, total = file.size, cs = curChunk;
   const report = makeProgress($('sBar'), info => {
     $('sBar').style.width = info.percent + '%';
@@ -1230,11 +1314,12 @@ function onAck() {
       curSid = randSid();
       $('sName').textContent = curFileLabel();
       $('sSize').textContent = fmtSize(curFile.size) + ' · ' + typeLabel(curFile.type);
+      $('sFileIc').innerHTML = fileIcon(curFile.type);
       $('sCheck').classList.add('hidden');
       $('sBar').style.width = '0';
       $('sBar').parentElement.setAttribute('aria-valuenow', '0');
       $('sStat').textContent = (curIdx + 1) + '/' + curFiles.length + ' 件目「' + curFile.name + '」— 相手の操作を待っています…';
-      sStep(3, 'wait', 'ファイル転送', '次のファイルのダウンロード開始を待っています。');
+      sStep(3, 'wait', 'ファイルを転送', '次のファイルのダウンロード開始を待っています');
       senderState = 'claimed';
       try { await sendMetaTo(slotConn); } catch (e) {}
     }, 800);
@@ -1243,14 +1328,14 @@ function onAck() {
   $('sStat').innerHTML = '<span class="ok">受信側での検証・保存が完了しました</span>';
   $('sDoneMsg').textContent = curFiles.length > 1 ? 'すべてのファイル (' + curFiles.length + '件) の転送が完了しました' : 'ファイルの転送が完了しました';
   $('sDone').classList.remove('hidden');
-  sStep(3, 'done', '転送が完了しました', '受信側での検証・保存が完了しました。', '転送完了');
+  sStep(3, 'done', '転送が完了しました', '受信側での検証・保存が完了しました');
   $('sCheck').classList.remove('hidden');
   if (maxRecv && recvDone >= maxRecv) {
     const p = peer;
     setTimeout(() => { if (peer === p) stopShare(maxRecv === 1 ? '1回の受信が完了したため、共有を終了しました。' : '受信回数の上限(' + maxRecv + '回)に達したため、共有を終了しました。'); }, 1500);
   } else {
     // 次の受信に備えて予約を解放(finishing中は新規接続を拒否)
-    setTimeout(() => { if (senderState === 'finishing') { senderState = 'idle'; slotConn = null; } }, 1000);
+    setTimeout(() => { if (senderState === 'finishing') { senderState = 'idle'; slotConn = null; showWaitPanel(true, '次の受信を待っています。URLとQRコードは引き続き有効です。'); } }, 1000);
   }
 }
 
@@ -1262,6 +1347,7 @@ function stopShare(msg) {
   // 鍵・PIN・セッション情報への参照を解放(共有終了後は復号不可能に)
   curKey = null; curSid = null; curPin = null; curPinHash = null; flowResolve = null;
   $('expire').textContent = '';
+  showWaitPanel(false);
   $('link').value = '';
   clearShareQR();
   $('sDone').classList.add('hidden');
@@ -1367,37 +1453,20 @@ async function initReceiver() {
     catch(e) { setStepError(1, 'URLのPINが正しくありません。'); return; }
   }
 
-  function setBadge(i, cls, text) {
-    const b = $('rb' + i);
-    if (!b) return;
-    b.className = 'step-badge' + (cls ? ' ' + cls : '');
-    b.textContent = text;
-  }
   function setStepActive(n) {
     for (let i = 1; i <= 3; i++) {
-      const step = $('step' + i);
-      const icon = step.querySelector('.step-icon');
-      step.classList.remove('active', 'done', 'error');
-      icon.classList.remove('active', 'done', 'error', 'waiting');
-      if (i < n) { step.classList.add('done'); icon.classList.add('done'); setBadge(i, 'done', '完了'); }
-      else if (i === n) { step.classList.add('active'); icon.classList.add('active'); setBadge(i, 'active', i === 3 ? '転送中' : '接続中'); }
-      else { icon.classList.add('waiting'); setBadge(i, '', '待機中'); }
+      if (i < n) setStepState($('step' + i), 'done');
+      else if (i === n) { setStepState($('step' + i), 'active'); updateStepSub(i, '現在このステップを処理中'); }
+      else setStepState($('step' + i), 'wait');
     }
   }
-  function setStepDone(n) {
-    const step = $('step' + n), icon = step.querySelector('.step-icon');
-    step.classList.remove('active', 'error'); step.classList.add('done');
-    icon.classList.remove('active', 'error', 'waiting'); icon.classList.add('done');
-    setBadge(n, 'done', '完了');
-  }
+  function setStepDone(n) { setStepState($('step' + n), 'done'); }
   function setStepError(n, msg) {
-    const step = $('step' + n), icon = step.querySelector('.step-icon');
-    step.classList.remove('active', 'done'); step.classList.add('error');
-    icon.classList.remove('active', 'done', 'waiting'); icon.classList.add('error');
-    setBadge(n, 'error', 'エラー');
+    setStepState($('step' + n), 'error');
     if (msg) $('rState').innerHTML = '<span class="err">' + esc(msg) + '</span>';
   }
   function updateStepLabel(n, text) { $('step' + n).querySelector('.step-label').textContent = text; }
+  function updateStepSub(n, text) { const el = $('step' + n).querySelector('.step-sub'); if (el) el.textContent = text; }
 
   setStepActive(1);
 
@@ -1456,6 +1525,7 @@ async function initReceiver() {
     if (retries >= 5) { fail('接続が切れ、再接続できませんでした。このページを再読み込みして、最初からやり直してください。'); return; }
     retries++;
     updateStepLabel(3, '再接続しています…(' + retries + '/5)');
+    updateStepSub(3, '接続の再確立を試みています');
     setStepActive(3);
     later(() => { if (!finished && !failed && !rpeer.destroyed) connect(); }, 2000);
   }
@@ -1471,6 +1541,7 @@ async function initReceiver() {
     started = true; t0 = Date.now(); base = received; lastChunkAt = Date.now();
     setStepActive(3);
     updateStepLabel(3, 'ファイルを受信中…');
+    updateStepSub(3, '現在このステップを処理中');
     $('dl').classList.add('hidden');
     $('actionArea').classList.add('hidden');
     $('rState').textContent = 'このタブを閉じないでください。';
@@ -1481,7 +1552,8 @@ async function initReceiver() {
   async function onMeta(m) {
     if (!meta) {
       setStepDone(1);
-      updateStepLabel(1, '送信者に接続しました');
+      updateStepLabel(1, '相手と接続しました');
+      updateStepSub(1, '接続が確立されました');
       setStepActive(2);
     }
     const info = JSON.parse(dec.decode(await decrypt(key, unb64u(m.d), META_AAD)));
@@ -1505,10 +1577,12 @@ async function initReceiver() {
       }
 
       setStepDone(2);
-      updateStepLabel(2, 'ファイル情報を検証しました');
+      updateStepLabel(2, 'ファイルを検証しました');
+      updateStepSub(2, 'ファイル名とサイズを確認しました');
       $('fileInfo').classList.remove('hidden');
       $('rName').textContent = meta.name;
       $('rSize').textContent = fmtSize(meta.size) + ' · ' + typeLabel(meta.type);
+      $('rFileIc').innerHTML = fileIcon(meta.type);
       $('rCheck').classList.add('hidden');
       $('rState').textContent = '受信の準備ができました。ボタンを押すと保存先を選んで開始します。';
       $('dl').classList.remove('hidden');
@@ -1525,6 +1599,7 @@ async function initReceiver() {
       finished = false; started = false; chain = Promise.resolve();
       $('rName').textContent = meta.name;
       $('rSize').textContent = fmtSize(meta.size) + ' · ' + typeLabel(meta.type);
+      $('rFileIc').innerHTML = fileIcon(meta.type);
       $('rCheck').classList.add('hidden');
       $('rBar').style.width = '0';
       $('rBar').parentElement.setAttribute('aria-valuenow', '0');
@@ -1538,12 +1613,9 @@ async function initReceiver() {
       $('dl').textContent = 'ダウンロード開始';
       $('dl').classList.remove('hidden');
       $('actionArea').classList.remove('hidden');
-      const st3 = $('step3'), ic3 = st3.querySelector('.step-icon');
-      st3.classList.remove('done', 'active', 'error');
-      ic3.classList.remove('done', 'active', 'error', 'waiting');
-      ic3.classList.add('waiting');
-      setBadge(3, '', '待機中');
-      updateStepLabel(3, 'ファイルを受信中…');
+      setStepState($('step3'), 'wait');
+      updateStepLabel(3, 'ファイルを受信');
+      updateStepSub(3, '受信開始を待っています');
     } else {
       // 再接続: 同一転送であることの検証(整合性)
       if (meta.size !== info.size || chunkSize !== info.chunk) {
@@ -1594,6 +1666,7 @@ async function initReceiver() {
     clearTimers(); clearInterval(stallWatch);
     setStepDone(3);
     updateStepLabel(3, '受信・検証が完了しました');
+    updateStepSub(3, 'ファイルをダウンロードできます');
     $('rBar').style.width = '100%';
     $('rBar').parentElement.setAttribute('aria-valuenow', '100');
     $('rPct').textContent = '100%';
