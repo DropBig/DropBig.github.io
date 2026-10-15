@@ -51,6 +51,8 @@ button:disabled{opacity:.5;cursor:default}
 .hidden{display:none}
 #qr{display:flex;justify-content:center;margin:12px 0 4px}
 #qr img,#qr canvas{background:#fff;padding:6px;border-radius:6px}
+/* QR本体(余白4モジュールはSVG内に含むため外側paddingは0。白黒反転・色付けは禁止) */
+#qr img.qr-img{width:min(280px,100%);height:auto;aspect-ratio:1/1;padding:0;border-radius:8px;background:#fff}
 .fname{font-weight:700;word-break:break-all;font-size:14px}
 .head{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:3px}
 @media (max-width:520px){
@@ -350,6 +352,111 @@ const qrSrcs = [
   'https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js'
 ];
 
+/* ---------- DropBig QR(高コントラスト・小さな中央ロゴ・4モジュール余白・SVG出力) ---------- */
+const QR_QUIET = 4;          // 余白(モジュール数)。規格推奨の4以上
+const QR_LOGO_RATIO = 0.2;   // ロゴ領域(白地込み)の一辺 / QR本体の一辺 → 面積約4%(誤り訂正Hの30%に対し十分小さい)
+const QR_LOGO_SVG =          // ロゴ(24x24座標)。差し替える場合はこの中身を置き換える
+  '<rect width="24" height="24" rx="5.5" fill="#000"/>' +
+  '<path d="M12 5.5v8.5M8.3 10.7 12 14.4l3.7-3.7M6.5 18.5h11" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+
+// qrcodejs内部のモデルから黒白マトリクスを取得(誤り訂正レベルはH固定)
+function qrMatrix(text) {
+  const q = new QRCode(document.createElement('div'), {text: text, width: 64, height: 64, correctLevel: QRCode.CorrectLevel.H});
+  const m = q && q._oQRCode;
+  if (!m || typeof m.getModuleCount !== 'function' || typeof m.isDark !== 'function') return null;
+  const n = m.getModuleCount();
+  const rows = [];
+  for (let r = 0; r < n; r++) { const row = []; for (let c = 0; c < n; c++) row.push(!!m.isDark(r, c)); rows.push(row); }
+  return rows;
+}
+
+// SVG文字列を生成(withLogo=falseでロゴなしの安全版)
+function qrSvg(rows, withLogo) {
+  const n = rows.length, total = n + QR_QUIET * 2;
+  let L = 0, s0 = 0;
+  if (withLogo) {
+    L = Math.round(n * QR_LOGO_RATIO);
+    if ((n - L) % 2) L++;                 // 中央にモジュール格子ぴったり合わせる
+    s0 = (n - L) / 2;
+  }
+  let d = '';
+  for (let r = 0; r < n; r++) {
+    let c = 0;
+    while (c < n) {
+      const hidden = (x) => withLogo && r >= s0 && r < s0 + L && x >= s0 && x < s0 + L;
+      if (rows[r][c] && !hidden(c)) {
+        let e = c; while (e < n && rows[r][e] && !hidden(e)) e++;
+        d += 'M' + (c + QR_QUIET) + ' ' + (r + QR_QUIET) + 'h' + (e - c) + 'v1h-' + (e - c) + 'z';
+        c = e;
+      } else c++;
+    }
+  }
+  let logo = '';
+  if (withLogo) {
+    const pos = s0 + QR_QUIET, pad = L * 0.14, size = L - pad * 2;
+    logo = '<rect x="' + pos + '" y="' + pos + '" width="' + L + '" height="' + L + '" fill="#fff"/>' +
+      '<g transform="translate(' + (pos + pad) + ' ' + (pos + pad) + ') scale(' + (size / 24) + ')">' + QR_LOGO_SVG + '</g>';
+  }
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + total + ' ' + total + '" shape-rendering="crispEdges">' +
+    '<rect width="' + total + '" height="' + total + '" fill="#fff"/><path d="' + d + '" fill="#000"/>' + logo + '</svg>';
+}
+
+function qrSvgToCanvas(svg, px) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas'); c.width = c.height = px;
+      const x = c.getContext('2d');
+      x.fillStyle = '#fff'; x.fillRect(0, 0, px, px);
+      x.drawImage(img, 0, 0, px, px);
+      resolve(c);
+    };
+    img.onerror = () => reject(new Error('qr raster failed'));
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  });
+}
+
+// 自己検証: 端末にBarcodeDetectorがあれば、ロゴ入りQRを実際に読み取って中身がURLと一致するか確認する。
+// 読めない/不一致ならロゴなしに切り替える。API非対応の端末では検証できないため通過扱い(設計上の余裕で担保)。
+async function qrSelfCheck(svg, url) {
+  if (!('BarcodeDetector' in window)) return true;
+  try {
+    const det = new BarcodeDetector({formats: ['qr_code']});
+    const canvas = await qrSvgToCanvas(svg, 512);
+    const res = await det.detect(canvas);
+    return res.length > 0 && res[0].rawValue === url;
+  } catch (e) { return true; }
+}
+
+async function renderShareQR(url) {
+  const box = document.getElementById('qr');
+  box.innerHTML = '';
+  if (typeof QRCode === 'undefined') return;
+  let svg = null;
+  try {
+    const rows = qrMatrix(url);
+    if (rows) {
+      svg = qrSvg(rows, true);
+      if (!(await qrSelfCheck(svg, url))) svg = qrSvg(rows, false);
+    }
+  } catch (e) { svg = null; }
+  // 待っている間に共有が終了・更新された場合は描画しない
+  if (document.getElementById('link').value !== url) return;
+  if (!svg) {   // 内部モデルが取得できない場合の保険(従来方式・ただし誤り訂正Hと大きめサイズ)
+    try { new QRCode(box, {text: url, width: 240, height: 240, correctLevel: QRCode.CorrectLevel.H}); } catch (e) {}
+    return;
+  }
+  const img = new Image();
+  img.className = 'qr-img';
+  img.alt = '共有URLのQRコード';
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  box.appendChild(img);
+}
+
+function clearShareQR() {
+  document.getElementById('qr').innerHTML = '';
+}
+
 Promise.all([
   loadScript(peerSrcs),
   loadScript(qrSrcs).catch(() => {})   // QRは必須ではない
@@ -544,10 +651,7 @@ async function startShare(file) {
       opened = true; clearTimeout(connectTimer);
       const url = location.origin + location.pathname + '#' + id + '.' + rawKey;
       $('link').value = url;
-      $('qr').innerHTML = '';
-      if (typeof QRCode !== 'undefined') {
-        try { new QRCode($('qr'), {text: url, width: 130, height: 130}); } catch(e){}
-      }
+      renderShareQR(url);
       $('sStat').textContent = '相手の接続を待っています…';
       const mins = ttlMins;
       const endAt = Date.now() + mins * 60000;
@@ -739,7 +843,7 @@ function stopShare(msg) {
   curKey = null; curSid = null; flowResolve = null;
   $('expire').textContent = '';
   $('link').value = '';
-  $('qr').innerHTML = '';
+  clearShareQR();
   $('sStat').innerHTML = '<b>' + esc(msg || '共有を終了しました。') + '</b>';
   $('stop').textContent = '新しいファイルを共有';
 }
