@@ -52,6 +52,9 @@ button:disabled{opacity:.5;cursor:default}
 #qr{display:flex;justify-content:center;margin:12px 0 4px}
 #qr img,#qr canvas{background:#fff;padding:6px;border-radius:6px}
 /* QR本体(余白4モジュールはSVG内に含むため外側paddingは0。白黒反転・色付けは禁止) */
+.foot{margin:22px 0 0;text-align:center;font-size:12px;color:var(--sub)}
+.foot a{color:var(--sub)}
+.foot a:hover{color:var(--text)}
 #qr img.qr-img{width:min(280px,100%);height:auto;aspect-ratio:1/1;padding:0;border-radius:8px;background:#fff}
 .fname{font-weight:700;word-break:break-all;font-size:14px}
 .head{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:3px}
@@ -299,6 +302,7 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
     </div>
   </section>
 
+  <p class="foot"><a href="terms.html">利用規約</a><span aria-hidden="true"> ・ </span><a href="privacy.html">プライバシーポリシー</a></p>
 </main>
 
 

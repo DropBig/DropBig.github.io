@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>プライバシーポリシー - DropBig</title>
+<style>
+:root{color-scheme:dark;--bg:#000;--text:#f5f6f8;--sub:#b3b7c2;--line:#262626;--accent:#6f8cff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;line-height:1.8;padding:24px 16px}
+main{max-width:760px;margin:0 auto;border:1px solid var(--line);border-radius:12px;padding:24px 22px 32px}
+h1{font-size:20px;margin:0 0 4px}
+h2{font-size:15px;margin:28px 0 6px;padding-top:14px;border-top:1px solid var(--line)}
+p,li{font-size:14px;color:#d2d5dc}
+ul,ol{padding-left:1.4em;margin:6px 0}
+.meta{color:var(--sub);font-size:12px;margin:0 0 12px}
+.note{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--sub)}
+a{color:var(--accent)}
+a:focus-visible{outline:3px solid #3b6ef5;outline-offset:2px}
+.back{margin-top:28px;font-size:14px}
+</style>
+</head>
+<body>
+<main>
+<h1>プライバシーポリシー</h1>
+<p class="meta">制定日: 2026年10月15日 ／ 最終改定日: 2026年10月15日</p>
+<p class="note">【公開前に必ず書き換えてください】<strong>［運営者名］</strong>・<strong>［連絡先］</strong>の2か所を実際の内容に置き換え、この枠は削除してください。</p>
+
+<p>［運営者名］（以下「運営者」）は、ファイル転送サービス「DropBig」（以下「本サービス」）における、利用者の情報の取り扱いを次のとおり定めます。</p>
+
+<h2>1. 基本的な考え方</h2>
+<p>本サービスはP2P（ブラウザ同士の直接通信）でファイルを送受信します。<strong>運営者は、送受信されるファイルの内容を受け取らず、保存もしません。</strong>アカウント登録は不要で、氏名・メールアドレスなどの個人情報の入力も求めません。</p>
+
+<h2>2. ファイルと共有リンクについて</h2>
+<ul>
+<li>ファイルは、送信者と受信者のブラウザの間で直接やり取りされます（直接つなげない場合の中継については、5を参照してください）。</li>
+<li>共有リンクとQRコードに含まれる暗号化の鍵は、URLの「#」より後ろの部分にあります。この部分は、ブラウザからサーバーへは送信されません。</li>
+</ul>
+
+<h2>3. 取得・利用する情報</h2>
+<p>本サービスの運営者は、利用者を特定できる情報を取得して保存することはありません。ただし、通信を成立させるために、次の外部の仕組みが関わり、それぞれの事業者が通信に伴う情報（IPアドレスなど）を取り扱うことがあります。</p>
+<ul>
+<li><strong>接続の仲介サーバー（PeerJSの公開サーバー）</strong>: 送信者と受信者がお互いを見つけて接続するために、一時的な識別子と接続情報（IPアドレスを含む場合があります）をやり取りします。ファイルの内容は通りません。</li>
+<li><strong>STUNサーバー</strong>: 接続に使うアドレスを調べるための公開サーバーです。IPアドレスが送られます。</li>
+<li><strong>ライブラリの配信元（CDN）</strong>: 画面の表示に使うプログラムを、外部のCDN（jsDelivr、unpkg、cdnjsなど）から読み込みます。読み込みの際に、CDN側にIPアドレスなどが記録されることがあります。</li>
+<li><strong>ホスティング事業者</strong>: 本サイトの配信元（例: GitHub Pages）では、アクセスログが記録されることがあります。</li>
+</ul>
+<p>これらの事業者による情報の取り扱いは、各事業者のプライバシーポリシーに従います。</p>
+
+<h2>4. ブラウザに保存される情報・Cookie</h2>
+<p>本サービスは、Cookieを使用しません。アクセス解析ツールや広告の配信も、現時点では導入していません。将来導入する場合は、この内容を改定して通知します。</p>
+
+<h2>5. 中継サーバー（TURN）を使う場合</h2>
+<p>お互いのネットワークの都合で直接つなげないとき、通信が中継サーバーを経由する場合があります。中継サーバーを使うようになった場合も、ファイルは暗号化されたまま通過するため、中継サーバーの運営者が内容を読むことはできません。ただし、中継サーバーには、通信の日時、データ量、IPアドレスが記録されることがあります。<em>（中継サーバーを導入していない間は、この項目は該当しません。）</em></p>
+
+<h2>6. 第三者への提供</h2>
+<p>運営者は、法令に基づく場合を除き、利用者の情報を第三者に提供しません。ただし、運営者は、そもそも利用者のファイルや個人を特定する情報を保存していません。</p>
+
+<h2>7. 安全管理</h2>
+<p>運営者は、HTTPSでの配信、読み込むプログラムの改ざん検知（SRI）、通信内容の暗号化などにより、情報の安全に配慮します。ただし、インターネット上の通信について、完全な安全性を保証するものではありません。</p>
+
+<h2>8. ポリシーの変更</h2>
+<p>運営者は、必要に応じて本ポリシーを変更します。変更後の内容は、このページに掲載した時点から効力を生じます。</p>
+
+<h2>9. お問い合わせ</h2>
+<p>本ポリシーに関するお問い合わせは、［連絡先］までお願いします。</p>
+
+<p class="back"><a href="./">&larr; DropBigに戻る</a> ／ <a href="terms.html">利用規約</a></p>
+</main>
+</body>
+</html>
