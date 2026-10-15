@@ -34,7 +34,7 @@ svg{display:block}
 #drop span{display:block;color:#d2d5dc;font-size:12px;line-height:18px;margin:10px 0 10px}
 #pick{padding:10px 18px;font-size:13px;line-height:18px;min-width:130px}
 .settings{margin-top:20px}
-.settings h2,.safe h2{font-size:15px;line-height:20px;font-weight:700;margin:0}
+.settings h2{font-size:15px;line-height:20px;font-weight:700;margin:0}
 .srow{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:50px}
 .srow+.srow{border-top:1px solid var(--line)}
 .srow:nth-of-type(1){min-height:48px}
@@ -42,10 +42,6 @@ svg{display:block}
 .srow label{color:var(--sub);font-size:14px}
 select{font:inherit;font-size:14px;color:var(--text);background-color:transparent;border:0;border-radius:7px;padding:6px 22px 6px 6px;text-align:right;text-align-last:right;cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23d5d8e0' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 4px center;background-size:12px}
 select option{background:#111;color:#fff}
-.safe{margin-top:6px;padding:12px 12px 0}
-.safe h2{display:flex;align-items:center;gap:8px}
-.safe h2 svg{width:16px;height:16px;flex:none}
-.safe p{margin:8px 0 0;color:#c4c8d0;font-size:12px;line-height:18px}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 input[type=text]{font:inherit;padding:6px 10px;border-radius:7px;border:1px solid var(--line);background:#0b0b0b;color:var(--text);font-size:12px}
 input.url{flex:1;min-width:0;width:100%}
@@ -81,14 +77,13 @@ button:disabled{opacity:.5;cursor:default}
   #pick{padding:13px 28px;font-size:16px;line-height:22px;min-width:180px}
   .drop-hint{font-size:12px;margin-top:12px}
   .settings{margin-top:22px}
-  .settings h2,.safe h2{font-size:17px}
+  .settings h2{font-size:17px}
   .srow{min-height:58px}
   .srow:nth-of-type(1){min-height:56px}
   .srow:nth-of-type(2){min-height:60px}
   .srow:nth-of-type(3){min-height:56px}
   .srow label{font-size:16px}
   select{font-size:16px;padding:8px 26px 8px 8px;background-size:14px}
-  .safe p{font-size:13px;line-height:19px}
   button{font-size:15px;padding:11px 18px;border-radius:10px}
   .small{font-size:12px}
   .fname{font-size:16px}
@@ -101,11 +96,6 @@ button:disabled{opacity:.5;cursor:default}
   .step-icon,.step-icon svg{width:22px;height:22px}
   .step-label{font-size:14px}
   #dl{padding:14px 20px;font-size:16px}
-  .features{grid-template-columns:1fr;gap:10px;margin-top:22px;padding-top:16px}
-  .feature-card{padding:14px;text-align:left;display:flex;align-items:center;gap:12px}
-  .feature-icon{width:28px;height:28px;margin:0;flex:none}
-  .feature-card h3{font-size:14px;margin:0 0 2px}
-  .feature-card p{font-size:11px;line-height:16px}
 }
 
 /* 接続ステップ(送信・受信で共通の見た目)。
@@ -142,8 +132,6 @@ button:disabled{opacity:.5;cursor:default}
 .file-row{display:flex;align-items:center;gap:12px;padding:12px 14px}
 .file-ic{width:38px;height:38px;flex:none;border-radius:10px;background:rgba(111,140,255,.12);color:var(--icon);display:inline-flex;align-items:center;justify-content:center}
 .file-ic svg{width:20px;height:20px}
-.file-note{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid var(--line);color:var(--sub);font-size:12px;line-height:18px}
-.file-note svg{width:15px;height:15px;flex:none;color:var(--st-done)}
 .fc-check{flex:none;width:22px;height:22px;color:var(--ok);display:inline-flex}
 .fc-check.hidden{display:none}
 .fc-check>span{display:inline-flex;width:100%;height:100%}
@@ -182,17 +170,8 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
 .sub-lead{color:var(--sub);font-size:12px;line-height:18px;margin:6px auto 0;max-width:480px}
 
 /* 特徴セクション */
-.features{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px;padding-top:20px;border-top:1px solid var(--line)}
-.feature-card{text-align:center;padding:16px 12px;background:rgba(107,124,240,.05);border:1px solid var(--line);border-radius:10px;transition:.15s}
-.feature-card:hover{background:rgba(107,124,240,.1);border-color:var(--accent2)}
-.feature-icon{width:32px;height:32px;margin:0 auto 10px;color:var(--icon)}
-.feature-icon svg{width:100%;height:100%}
-.feature-card h3{font-size:13px;font-weight:600;margin:0 0 6px;color:var(--text)}
-.feature-card p{font-size:10px;line-height:15px;color:var(--sub);margin:0}
 
 @media (max-width:520px){
-  .features{grid-template-columns:1fr;gap:8px}
-  .feature-card{padding:12px}
   h1{font-size:22px}
   .lead{font-size:14px}
 }
@@ -209,16 +188,6 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
 
 /* 接続待機パネル: 待機中は転送進捗(確定値)の代わりに表示。
    不定形のスライドバーで「進捗が止まっている」と誤解されにくくする。 */
-.wait-panel{margin-top:14px;border:1px solid var(--line);border-radius:12px;padding:16px;background:rgba(107,124,240,.04)}
-.wait-head{display:flex;align-items:center;gap:12px}
-.wait-icon{width:38px;height:38px;flex:none;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:rgba(111,140,255,.14);color:var(--icon)}
-.wait-icon svg{width:20px;height:20px}
-.wait-title{font-size:15px;font-weight:700;color:var(--text);line-height:1.4}
-.wait-sub{margin-top:2px;color:#c4c8d0;font-size:12px;line-height:18px}
-.wait-panel .bar{margin-top:14px}
-.bar.indet>i{width:35%;animation:indet 1.4s ease-in-out infinite}
-@keyframes indet{0%{margin-left:0}50%{margin-left:65%}100%{margin-left:0}}
-.wait-foot{margin-top:8px;color:var(--sub);font-size:11px;line-height:16px}
 
 /* タッチデバイス・狭い画面: 押しやすいボタンサイズ(44px以上) */
 @media (max-width:720px){
@@ -333,36 +302,6 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
           <select id="csz"><option value="61440" selected>60 KB(安定)</option><option value="131072">128 KB(標準)</option><option value="262144">256 KB(高速)</option></select>
         </div>
       </section>
-
-      <section class="safe" id="safe">
-        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>転送方式について</h2>
-        <p>ファイルをサーバーに保存せず、対応するブラウザ間で直接転送します。接続の確立には外部サービスを使用します。</p>
-      </section>
-
-      <!-- 特徴セクション -->
-      <section class="features">
-        <div class="feature-card">
-          <div class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z"/></svg>
-          </div>
-          <h3>Easy Upload</h3>
-          <p>Drag and drop or click to upload any file type</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-          </div>
-          <h3>Instant Sharing</h3>
-          <p>Get a shareable link and QR code immediately</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
-          </div>
-          <h3>Secure &amp; Direct</h3>
-          <p>Encrypted in transit, never stored on our servers</p>
-        </div>
-      </section>
     </div>
 
     <div class="card hidden" id="shareCard">
@@ -375,7 +314,6 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
           </div>
           <span class="fc-check hidden" id="sCheck" aria-label="転送完了"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg></span></span>
         </div>
-        <div class="file-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg><span>共有するファイルを確認してください</span></div>
       </div>
       <div class="steps conn-steps" id="sSteps" aria-live="polite">
 <div class="step" id="sst1" data-state="wait">
@@ -414,17 +352,6 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
             <div class="small step-sub">接続後に開始</div>
           </div>
         </div>
-      </div>
-      <div class="wait-panel hidden" id="waitPanel">
-        <div class="wait-head">
-          <span class="wait-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h.01"/><path d="M8.5 16.4a5 5 0 0 1 7 0"/><path d="M5 12.9a10 10 0 0 1 14 0"/><path d="M1.5 9.3a15 15 0 0 1 21 0"/></svg></span>
-          <div>
-            <div class="wait-title">相手を待っています</div>
-            <div class="small wait-sub" id="waitSub">共有URLを相手に送信してください。</div>
-          </div>
-        </div>
-        <div class="bar indet" role="progressbar" aria-label="接続待機中"><i></i></div>
-        <div class="small wait-foot">接続待機中 - この画面を開いたままお待ちください</div>
       </div>
       <div class="share-qr-card">
         <div class="qr-card-title">相手に接続してもらいましょう</div>
@@ -1082,11 +1009,9 @@ function setStepState(step, state) {
    待機中は転送進捗(確定値のバー・%表示)を隠し、不定形バーの待機パネルを表示する。
    これにより「転送が0%で止まっている」と誤解されるのを防ぐ。 */
 function showWaitPanel(on, sub) {
-  $('waitPanel').classList.toggle('hidden', !on);
   $('sBar').parentElement.classList.toggle('hidden', on);
   $('sStat').parentElement.classList.toggle('hidden', on);
   $('sSizes').classList.toggle('hidden', on);
-  if (on && sub) $('waitSub').textContent = sub;
 }
 
 /* 送信側接続ステップ: state = wait | active | done | error
@@ -1436,7 +1361,6 @@ if (location.hash.length > 5) initReceiver();
 async function initReceiver() {
   $('sendView').classList.add('hidden');
   $('recvView').classList.remove('hidden');
-  $('recvView').appendChild($('safe'));
 
   const parts = location.hash.slice(1).split('.');
   const pid = parts[0], keyStr = parts[1], pin = parts[2] || '';
