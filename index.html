@@ -5,11 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#000000">
-<!-- CSP: インラインstyle属性を使用するためstyle-srcは'unsafe-inline'。運用時はインラインスクリプトを外部ファイル+nonce移行を推奨 -->
+<meta name="description" content="DropBig — 登録不要・サーバー保存なしのP2Pファイル転送。ブラウザ間で直接・暗号化してファイルを送受信。大容量ファイル・複数ファイル対応。">
+<meta property="og:title" content="DropBig - 登録不要のP2Pファイル転送">
+<meta property="og:description" content="ブラウザ間で直接・暗号化してファイルを送受信。登録不要、サーバーにファイルは保存されません。">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236f8cff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z'/%3E%3C/svg%3E">
+<!-- CSP: インラインstyle属性を使用するためstyle-srcは'unsafe-inline'。
+     TURN(中継)サーバーを運用する場合は connect-src に turn:turn.example.com を追加すること。
+     シグナリングを自前のpeerjs-serverに移行する場合はconnect-srcの0.peerjs.comを削除できる。
+     運用時はインラインスクリプトを外部ファイル+nonce移行を推奨 -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com; style-src 'unsafe-inline'; connect-src 'self' https://0.peerjs.com wss://0.peerjs.com; img-src 'self' data: blob:; media-src blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>DropBig - 登録不要のP2Pファイル転送</title>
 <style>
 :root{color-scheme:dark;--bg:#000;--text:#4176E6;--sub:#b3b7c2;--line:#262626;--accent:#3b6ef5;--accent2:#6b7cf0;--icon:#6f8cff;--ok:#32d583;--err:#f97066;--scale:0.78}
+*{box-sizing:border-box,forced-color-adjust:none}
 *{box-sizing:border-box;forced-color-adjust:none}
 body{margin:0;font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:16px;font-size:14px}
 main{width:100%;max-width:800px;border:1px solid var(--line);border-radius:12px;padding:20px 20px 28px;background:var(--bg)}
@@ -17,7 +26,7 @@ main{width:100%;max-width:800px;border:1px solid var(--line);border-radius:12px;
 h1{font-size:20px;font-weight:500;line-height:26px;margin:0}
 .lead{color:#d2d5dc;font-size:14px;line-height:20px;margin:6px 0 0}
 svg{display:block}
-#drop{border:2px dashed var(--accent2);border-radius:12px;padding:20px 16px 20px;text-align:center;background:transparent;transition:.15s}
+#drop{border:2px dashed var(--accent2);border-radius:12px;padding:20px 16px 20px;text-align:center;background:transparent;transition:.15s;cursor:pointer}
 #drop.over{background:rgba(107,124,240,.1)}
 #drop:focus-visible,button:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 #drop .cloud{width:30px;height:30px;margin:0 auto 14px;color:var(--icon);background:rgba(107,124,240,.14);border-radius:50%;padding:16px;box-sizing:content-box}
@@ -142,7 +151,7 @@ button:disabled{opacity:.5;cursor:default}
 
 /* 進捗 */
 .progress-area{margin-bottom:12px}
-.progress-text{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.progress-text{display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:8px}
 
 /* 状態メッセージ */
 .status-msg{padding:10px 0;color:var(--sub)}
@@ -242,6 +251,29 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
 #qrBig{background:#fff;padding:16px;border-radius:12px;width:min(80vmin,480px);height:auto;aspect-ratio:1/1}
 #qrClose{background:transparent;color:var(--icon);border:1px solid var(--line);font:inherit;border-radius:8px;padding:8px 18px;cursor:pointer;font-weight:700;font-size:13px}
 #qrClose:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* 画面内バナー(alertの代わり) */
+.banner{margin:14px 0 0;padding:10px 14px;border-radius:8px;font-size:13px;line-height:1.6;border:1px solid var(--err);color:#ffd9d9;background:rgba(249,112,102,.1)}
+.banner.info{color:#cfe3ff;background:rgba(59,110,245,.12);border-color:var(--accent2)}
+.banner.hidden{display:none}
+
+/* PIN表示 */
+.pin-row{margin-top:10px;font-size:12px;color:var(--sub);line-height:1.6}
+.pin-row b{color:var(--text);letter-spacing:3px;font-size:14px}
+
+/* 共有アクション(URLコピー・共有終了) */
+.url-row{align-items:stretch}
+.btn-copy{display:inline-flex;align-items:center;gap:6px;flex:none}
+.btn-copy svg{width:15px;height:15px;flex:none}
+.btn-copy.copied{background:var(--ok)}
+.share-actions{display:flex;margin-top:14px}
+#stop{display:inline-flex;align-items:center;justify-content:center;gap:6px;width:100%}
+#stop svg{width:14px;height:14px;flex:none}
+#stop.danger{color:var(--err);border-color:var(--err);background:rgba(249,112,102,.08)}
+@media (min-width:721px){
+  .share-actions{justify-content:flex-end}
+  #stop{width:auto;min-width:160px}
+}
 </style>
 </head>
 <body>
@@ -249,18 +281,18 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
   <header class="top">
     <h1>DropBig</h1>
     <p class="lead">Share Large Files Instantly</p>
-    <p class="sub-lead">Upload videos, files, or folders and get a shareable link that enables direct downloads. No limits, no hassle.</p>
+    <p class="sub-lead">ブラウザ間で直接・暗号化してファイルを送受信。登録不要、サーバーにファイルは保存されません。共有リンクは有効期限付きで発行されます。</p>
   </header>
 
   <!-- 送信画面 -->
   <section id="sendView">
     <div id="setupView">
-      <div id="drop" role="group" aria-label="File drop area">
+      <div id="drop" aria-label="ファイルを選択またはドロップ">
         <svg class="cloud" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z"/></svg>
         <b>Drop your file here</b>
-        <span>or click to browse from your device</span>
+        <span>クリックしてファイルを選択、またはドラッグ&amp;ドロップ</span>
         <button type="button" id="pick">Select File</button>
-        <small class="drop-hint">Support for videos, images, documents, and more — 複数ファイルもまとめて選択できます</small>
+        <small class="drop-hint">動画・画像・文書など — 複数ファイルもまとめて選択できます</small>
       </div>
       <input type="file" id="file" class="hidden" multiple>
 
@@ -305,14 +337,14 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
           </div>
           <h3>Instant Sharing</h3>
-          <p>Get a shareable link immediately after upload</p>
+          <p>Get a shareable link and QR code immediately</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
           </div>
-          <h3>Secure & Fast</h3>
-          <p>Your files are stored securely with fast download speeds</p>
+          <h3>Secure &amp; Direct</h3>
+          <p>Encrypted in transit, never stored on our servers</p>
         </div>
       </section>
     </div>
@@ -360,8 +392,9 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
         </div>
         <div class="share-info">
           <div class="small share-url-label">この URL を相手に送ってください</div>
-          <div class="row"><input type="text" class="url" id="link" readonly aria-label="共有URL"><button id="copy">コピー</button></div>
-          <div class="bar"><i id="sBar"></i></div>
+          <div class="row url-row"><input type="text" class="url" id="link" readonly aria-label="共有URL"><button id="copy" class="btn-copy" aria-label="共有URLをコピー"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><span>コピー</span></button></div>
+          <div class="small pin-row">PIN: <b id="sPin"></b><br>リンクにPINも含まれています。安全のため、リンクとは別の手段でPINだけ伝える使い方もできます。</div>
+          <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="送信進捗"><i id="sBar"></i></div>
           <div class="progress-text">
             <span class="small" id="sStat" role="status" aria-live="polite">相手の接続を待っています…</span>
             <span class="small pct" id="sPct">0%</span>
@@ -372,10 +405,10 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
             <span id="sDoneMsg"></span>
           </div>
           <div class="small" style="margin-top:10px">完了と表示されるまで、このタブを開いたままにしてください。有効期限もこのタブが開いている間だけ有効です。</div>
-          <div class="small" style="margin-top:6px;color:#e0a75e">この URL には復号鍵が含まれています。信頼できる相手のみに送り、公開掲示板等には貼らないでください。</div>
+          <div class="small" style="margin-top:6px;color:#e0a75e">この URL には復号鍵とPINが含まれています。信頼できる相手のみに送り、公開掲示板等には貼らないでください。</div>
         </div>
       </div>
-      <div style="margin-top:12px"><button class="sec" id="stop">共有をやめる</button></div>
+      <div class="share-actions"><button class="sec" id="stop" aria-label="共有を終了"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></svg><span id="stopLabel">共有を終了</span></button></div>
     </div>
   </section>
 
@@ -415,9 +448,10 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
 
       <!-- 進捗バー -->
       <div class="progress-area hidden" id="progressArea">
-        <div class="bar"><i id="rBar"></i></div>
+        <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="受信進捗"><i id="rBar"></i></div>
         <div class="progress-text">
           <span class="small" id="rStat"></span>
+          <span class="small" id="rEta"></span>
           <span class="small pct" id="rPct">0%</span>
         </div>
         <div class="small" id="rSizes"></div>
@@ -443,6 +477,7 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
   <img id="qrBig" alt="共有URLのQRコード（拡大表示）">
   <button type="button" id="qrClose">閉じる</button>
 </div>
+  <div id="banner" class="banner hidden" role="alert"></div>
   <p class="foot"><a href="terms.html">利用規約</a><span aria-hidden="true"> ・ </span><a href="privacy.html">プライバシーポリシー</a></p>
 </main>
 
@@ -451,14 +486,19 @@ h1{font-size:28px;font-weight:600;line-height:34px;margin:0;background:linear-gr
 /* ============================================================
  * DropBig - P2Pファイル転送(強化版)
  * 改善点:
- *  1. 受信枠の予約制(受信回数制限の競合を防止)
+ *  1. 受信枠の予約制(受信回数制限の競合を防止) + CASによる予約レース防止
  *  2. 転送セッションID(sid)による再接続時の同一性検証
- *  3. メモリ使用量の制御(保存先API未対応環境のサイズ上限・蓄積監視)
- *  4. 統一されたタイムアウト管理(接続/メタ/停滞/ACK)
+ *  3. メモリ使用量の制御(保存先API未対応環境のサイズ上限・蓄積監視。
+ *     iOS/Safariは512MBに制限、storage.estimateで動的に縮小)
+ *  4. 統一されたタイムアウト管理(接続/メタ/停滞/ACK/PIN)
  *  5. メッセージ種別ごとの厳密な検証
  *  6. CDNフォールバックローダ(単一配信元への依存を低減)
  *  7. チャンクサイズの選択可能化 + バッファ滞留監視
  *  8. 受信キューの深さ制限 + 進捗表示のスロットル
+ *  9. 4桁PINによる受信枠乗っ取り防止(リンクを知る第三者の_claim_を遮断)
+ * 10. フロー制御をバイト基準に(ウィンドウ64チャンク×1MB想定の溢れを防止)
+ * 11. ドロップゾーンのクリック/キーボード対応、progressbarロール、
+ *     alert()→画面内バナー、安全コンテキストの事前チェック
  * ============================================================ */
 
 /* ---------- CDNローダ(複数配信元でフォールバック) ---------- */
@@ -622,6 +662,12 @@ Promise.all([
 });
 
 function boot(){
+/* ---------- 安全コンテキストの事前チェック ---------- */
+if (!window.isSecureContext || !window.crypto || !crypto.subtle || !crypto.subtle.generateKey) {
+  document.body.insertAdjacentHTML('beforeend',
+    '<div style="position:fixed;inset:auto 0 0 0;padding:12px;background:#3a1212;color:#ffd9d9;text-align:center;font-size:13px">このサービスはHTTPS環境と最新のブラウザ(Web Crypto対応)が必要です。お使いのブラウザを更新するか、HTTPSで開き直してください。</div>');
+  return;
+}
 if (typeof Peer === 'undefined') {
   document.body.insertAdjacentHTML('beforeend',
     '<div style="position:fixed;inset:auto 0 0 0;padding:12px;background:#3a1212;color:#ffd9d9;text-align:center;font-size:13px">通信ライブラリを初期化できませんでした。再読み込みしてください。</div>');
@@ -639,14 +685,32 @@ const META_TIMEOUT = 30000;          // 受信側: メタデータ待機
 const STALL_TIMEOUT = 60000;         // 受信側: チャンク停滞
 const CLAIM_TIMEOUT = 600000;        // 送信側: 受信枠の予約保持(開始されなければ解放)
 const BUFFER_STALL_TIMEOUT = 30000;  // 送信側: bufferedAmount 滞留
+const PIN_TIMEOUT = 15000;           // 送信側: PINメッセージの待機
 const PROGRESS_MIN_INTERVAL = 200;   // 進捗表示の更新間隔
 const MAX_PENDING_CHUNKS = 400;      // 受信側: 処理待ちチャンク上限(個数)
 const MAX_PENDING_BYTES = 48 * 1024 * 1024; // 受信側: 処理待ちバイト上限
-const FLOW_WINDOW = 64;              // 送信側: 未確認チャンクの送信上限
+const FLOW_WINDOW_BYTES = 32 * 1024 * 1024; // 送信側: 未確認バイトの送信上限(バイト基準)
 const FLOW_ACK_EVERY = 32;           // 受信側: この個数処理するごとにflowを返す
 const CHUNK_MIN = 16 * 1024, CHUNK_MAX = 1024 * 1024;
 const enc = new TextEncoder(), dec = new TextDecoder();
 const META_AAD = enc.encode('meta');
+
+/* ---------- 接続設定 ---------- */
+// シグナリングサーバー: 既定はPeerJS公開サーバー。自前のpeerjs-serverを立てた場合は
+// 以下のhost/pathを変更する(同一オリジンならCSPの0.peerjs.comを削除できる)。
+const SIGNALING = {host: '0.peerjs.com', port: 443, path: '/', secure: true};
+// STUN/TURN: 対称NAT環境での中継にはTURNサーバー(coturn等)が必要。
+// TURNを有効化する場合は下記コメントを外し、CSPのconnect-srcにもturn:ホストを追加すること。
+const ICE_SERVERS = [
+  {urls: 'stun:stun.l.google.com:19302'}
+  // 例: {urls: 'turn:turn.example.com:3478', username: 'user', credential: 'pass'}
+];
+function peerOptions(id){
+  const o = {host: SIGNALING.host, port: SIGNALING.port, path: SIGNALING.path, secure: SIGNALING.secure,
+             config: {iceServers: ICE_SERVERS}};
+  if (id) o.id = id;
+  return o;
+}
 
 const fmtSize = n => n < 1024 ? n + ' B' : n < 1048576 ? (n/1024).toFixed(1) + ' KB' : n < 1073741824 ? (n/1048576).toFixed(1) + ' MB' : (n/1073741824).toFixed(2) + ' GB';
 const fmtEta = s => !isFinite(s) ? '' : s < 60 ? Math.ceil(s) + '秒' : Math.floor(s/60) + '分' + String(Math.ceil(s%60)).padStart(2,'0') + '秒';
@@ -655,9 +719,26 @@ const b64u = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\
 const unb64u = s => Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')), c => c.charCodeAt(0));
 const randId = () => 'db-' + Array.from(crypto.getRandomValues(new Uint8Array(10)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join('');
 const randSid = () => b64u(crypto.getRandomValues(new Uint8Array(16)));
+const genPin = () => String(crypto.getRandomValues(new Uint16Array(1))[0] % 10000).padStart(4, '0');
+async function sha256Hex(s){
+  const d = await crypto.subtle.digest('SHA-256', enc.encode(s));
+  return Array.from(new Uint8Array(d), b => b.toString(16).padStart(2, '0')).join('');
+}
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const verr = msg => Object.assign(new Error(msg), {userMsg: msg});
+
+/* ---------- 画面内バナー(alertの代わり) ---------- */
+let bannerTimer = null;
+function bannerMsg(msg, isInfo){
+  const b = $('banner');
+  if (!b) { (isInfo ? console.info : console.error)(msg); return; }
+  b.textContent = msg;
+  b.classList.toggle('info', !!isInfo);
+  b.classList.remove('hidden');
+  clearTimeout(bannerTimer);
+  bannerTimer = setTimeout(() => b.classList.add('hidden'), 8000);
+}
 
 /* ---------- 暗号 ---------- */
 const chunkAad = (cs, i) => {          // チャンクサイズもAADに含め、チャンク単位の混同を検出
@@ -690,6 +771,7 @@ const MSG_SCHEMA = {
   done:  { req: {sid: s => typeof s === 'string' && s.length <= 64,
                  size: n => Number.isSafeInteger(n) && n >= 0} },
   flow:  { req: {n: n => Number.isSafeInteger(n) && n >= 0} },
+  pin:   { req: {p: s => typeof s === 'string' && s.length > 0 && s.length <= 64} },
   ack:   { req: {} }, fail: { req: {} }, busy: { req: {} }, ended: { req: {} }
 };
 function parseMsg(d) {
@@ -711,7 +793,7 @@ function parseMsg(d) {
 const safeName = n => n.replace(/[\\/:*?"<>|\x00-\x1f]/g, '_').slice(0, MAX_NAME_LEN) || 'download';
 
 /* ---------- 進捗表示(スロットル付き) ---------- */
-function makeProgress(onInfo){
+function makeProgress(barEl, onInfo){
   let last = 0, lastBytes = 0;
   return (label, done, total, base, t0, force) => {
     const now = Date.now();
@@ -721,9 +803,11 @@ function makeProgress(onInfo){
     const sec = (now - t0) / 1000;
     let rate = 0;
     if (sec > 1 && done > base) rate = (done - base) / sec;
+    const percent = total ? Math.floor(done / total * 100) : 100;
+    if (barEl) barEl.parentElement.setAttribute('aria-valuenow', String(percent));
     onInfo({
       label: label,
-      percent: total ? Math.floor(done / total * 100) : 100,
+      percent: percent,
       done: done, total: total,
       rate: rate,
       eta: rate > 0 ? (total - done) / rate : Infinity
@@ -732,11 +816,23 @@ function makeProgress(onInfo){
 }
 
 /* ---------- メモリ上限の推定 ---------- */
-function memoryCap(){
+async function memoryCap(){
   if (window.showSaveFilePicker && window.isSecureContext) return MAX_FILE_SIZE; // ストリーム保存可
   let cap = 1.5 * 1024 * 1024 * 1024;
+  // iOS/Safariは大きなBlob生成が不安定なため上限を引き下げる
+  const ua = navigator.userAgent;
+  if (/iP(hone|ad|od)/.test(ua) || (/Safari/.test(ua) && !/Chrome|Chromium|Android/.test(ua))) {
+    cap = Math.min(cap, 512 * 1024 * 1024);
+  }
   const dm = navigator.deviceMemory;   // GB単位(Chrome)
   if (dm) cap = Math.min(cap, Math.max(256 * 1024 * 1024, (dm / 4) * 1024 * 1024 * 1024));
+  // ストレージ見積もりに基づく動的な縮小
+  try {
+    if (navigator.storage && navigator.storage.estimate) {
+      const est = await navigator.storage.estimate();
+      if (est && est.quota) cap = Math.min(cap, Math.max(128 * 1024 * 1024, Math.floor(est.quota / 3)));
+    }
+  } catch (e) {}
   return Math.floor(cap);
 }
 
@@ -746,6 +842,7 @@ let expireTimer = null, countTimer = null, ackTimer = null, claimTimer = null;
 let senderState = 'idle';   // idle | claimed | sending | waitack | finishing | closed
 let flowResolve = null;      // バックプレッシャー: 受信側flow待ちのリゾルバ
 let curFile = null, curKey = null, curSid = null, curChunk = 61440;
+let curPin = null, curPinHash = null;   // 受信枠乗っ取り防止のPIN
 let curFiles = [], curIdx = 0;      // 複数ファイルの転送キュー
 let pendingFiles = [];              // 共有開始前の選択ファイルリスト
 let slotConn = null;         // 受信枠を予約した接続
@@ -753,7 +850,19 @@ let ttlMins = 60, maxRecv = 1, recvDone = 0;
 let starting = false, ended = false, opened = false;
 
 const drop = $('drop'), fileInput = $('file');
-$('pick').onclick = () => fileInput.click();
+$('pick').onclick = e => { e.stopPropagation(); fileInput.click(); };
+/* ドロップゾーン全体をクリック・キーボードで操作可能に */
+drop.tabIndex = 0;
+drop.setAttribute('role', 'button');
+drop.addEventListener('click', e => {
+  if (e.target.closest('button')) return;
+  if (!peer && !starting && !location.hash) fileInput.click();
+});
+drop.addEventListener('keydown', e => {
+  if ((e.key === 'Enter' || e.key === ' ') && !peer && !starting && !location.hash) {
+    e.preventDefault(); fileInput.click();
+  }
+});
 ['dragenter','dragover'].forEach(e => document.addEventListener(e, ev => { ev.preventDefault(); drop.classList.add('over'); }));
 ['dragleave','drop'].forEach(e => document.addEventListener(e, ev => { ev.preventDefault(); drop.classList.remove('over'); }));
 document.addEventListener('drop', ev => {
@@ -767,7 +876,7 @@ fileInput.onchange = () => { if (fileInput.files.length) queueFiles(fileInput.fi
 function queueFiles(fileList) {
   const arr = Array.from(fileList).filter(f => f && Number.isSafeInteger(f.size) && f.size >= 0);
   const room = MAX_FILES - pendingFiles.length;
-  if (arr.length > room) alert('一度に共有できるのは ' + MAX_FILES + ' 件までです。超過分は追加されません。');
+  if (arr.length > room) bannerMsg('一度に共有できるのは ' + MAX_FILES + ' 件までです。超過分は追加されません。', true);
   pendingFiles = pendingFiles.concat(arr.slice(0, Math.max(0, room)));
   renderFileList();
 }
@@ -792,7 +901,8 @@ function renderFileList() {
 }
 $('clearFiles').onclick = () => { pendingFiles = []; renderFileList(); };
 $('shareStart').onclick = () => { if (pendingFiles.length && !peer && !starting) startShare(pendingFiles); };
-window.addEventListener('beforeunload', ev => { if (senderState === 'sending' || senderState === 'claimed') { ev.preventDefault(); ev.returnValue = ''; } });
+/* 実際に転送中の場合のみ離脱確認を出す */
+window.addEventListener('beforeunload', ev => { if (senderState === 'sending' || senderState === 'waitack') { ev.preventDefault(); ev.returnValue = ''; } });
 
 function isSlotBusy(){
   return senderState === 'claimed' || senderState === 'sending' ||
@@ -813,7 +923,7 @@ async function startShare(files) {
     // 送信開始前のファイルサイズ検証(異常値を早めに拒否)
     for (const f of files) {
       if (!Number.isSafeInteger(f.size) || f.size < 0 || f.size > MAX_FILE_SIZE) {
-        alert('「' + (f.name || 'ファイル') + '」のサイズがサポート範囲を超えています。');
+        bannerMsg('「' + (f.name || 'ファイル') + '」のサイズがサポート範囲を超えています。', true);
         starting = false;
         return;
       }
@@ -828,14 +938,18 @@ async function startShare(files) {
     curSid = randSid();   // 転送セッションID(再接続時の同一性検証用)
     curKey = await crypto.subtle.generateKey({name:'AES-GCM', length:256}, true, ['encrypt','decrypt']);
     const rawKey = b64u(await crypto.subtle.exportKey('raw', curKey));
+    curPin = genPin();
+    curPinHash = await sha256Hex(curPin);
     const id = randId();
     opened = false; senderState = 'idle';
     $('setupView').classList.add('hidden');
     $('shareCard').classList.remove('hidden');
     $('sName').textContent = curFileLabel();
     $('sSize').textContent = fmtSize(curFile.size) + ' · ' + typeLabel(curFile.type);
+    $('sPin').textContent = curPin;
     $('sCheck').classList.add('hidden');
     $('sBar').style.width = '0';
+    $('sBar').parentElement.setAttribute('aria-valuenow', '0');
     $('sPct').textContent = '0%';
     $('sSizes').textContent = '';
     $('sDone').classList.add('hidden');
@@ -844,7 +958,7 @@ async function startShare(files) {
     sStep(2, 'wait', '相手の接続を待っています', '相手がQRコードを読み取ると接続を開始します。');
     sStep(3, 'wait', 'ファイル転送', '相手がダウンロードを開始すると転送します。');
 
-    peer = new Peer(id);
+    peer = new Peer(peerOptions(id));
     const myPeer = peer;
     const connectTimer = setTimeout(() => {
       if (peer === myPeer && !opened) { sStep(1, 'error', 'サーバーに接続できませんでした', 'ネットワークを確認してやり直してください。'); stopShare('サーバーに接続できませんでした。ネットワークを確認してやり直してください。'); }
@@ -853,7 +967,7 @@ async function startShare(files) {
       opened = true; clearTimeout(connectTimer);
       sStep(1, 'done', 'サーバーに接続しました', '共有リンクを発行しました。');
       sStep(2, 'active');
-      const url = location.origin + location.pathname + '#' + id + '.' + rawKey;
+      const url = location.origin + location.pathname + '#' + id + '.' + rawKey + '.' + curPin;
       $('link').value = url;
       renderShareQR(url);
       $('sStat').textContent = '相手の接続を待っています…';
@@ -875,21 +989,22 @@ async function startShare(files) {
   } catch (e) {
     peer = null;
     resetSender();
-    alert('共有の準備に失敗しました。もう一度お試しください。');
+    bannerMsg('共有の準備に失敗しました。もう一度お試しください。', true);
   } finally {
     starting = false;
   }
 }
 
 /* 送信側接続ステップ: state = active | wait | done | error */
-function sStep(n, state, title, sub) {
+/* badge: done時のバッジ文言(省略時は「接続済み」) */
+function sStep(n, state, title, sub, badge) {
   const step = $('sst' + n), icon = step.querySelector('.step-icon'), b = $('ssb' + n);
   step.classList.remove('active', 'done', 'error');
   icon.classList.remove('active', 'done', 'error', 'waiting');
   b.className = 'step-badge';
   if (state === 'done') {
     step.classList.add('done'); icon.classList.add('done');
-    b.classList.add('done'); b.textContent = '接続済み';
+    b.classList.add('done'); b.textContent = badge || '接続済み';
   } else if (state === 'error') {
     step.classList.add('error'); icon.classList.add('error');
     b.classList.add('error'); b.textContent = 'エラー';
@@ -916,43 +1031,76 @@ async function sendMetaTo(conn) {
   conn.send(JSON.stringify({t:'meta', d: b64u(meta)}));
 }
 
-function onSenderConn(conn) {
-  conn.on('open', async () => {
-    try {
-      /* --- 受信枠の予約: 1接続のみ許可(競合防止) --- */
-      // claimedかつslotConnが空の場合は「切断後の再接続待ち」なので再予約を許可する。
-      // 同一転送であることは、後続のstartメッセージのsid検証で担保する。
-      const resumeWaiting = senderState === 'claimed' && slotConn === null;
-      if ((isSlotBusy() && !resumeWaiting) || senderState === 'closed') {
-        conn.send(JSON.stringify(senderState === 'closed' ? {t:'ended'} : {t:'busy'}));
-        setTimeout(() => { try { conn.close(); } catch(e){} }, 500);
-        return;
+/* 接続の正式受け入れ: PIN検証通過後に呼ばれる */
+async function acceptConn(conn) {
+  try {
+    if (!curFile || !curKey || !curSid) {
+      try { conn.send(JSON.stringify({t:'ended'})); } catch(e){}
+      setTimeout(() => { try { conn.close(); } catch(e){} }, 300);
+      return;
+    }
+    /* --- 受信枠の予約: 1接続のみ許可(競合防止) --- */
+    // claimedかつslotConnが空の場合は「切断後の再接続待ち」なので再予約を許可する。
+    // 同一転送であることは、後続のstartメッセージのsid検証で担保する。
+    const resumeWaiting = senderState === 'claimed' && slotConn === null;
+    if ((isSlotBusy() && !resumeWaiting) || senderState === 'closed') {
+      conn.send(JSON.stringify(senderState === 'closed' ? {t:'ended'} : {t:'busy'}));
+      setTimeout(() => { try { conn.close(); } catch(e){} }, 500);
+      return;
+    }
+    // CAS: 予約レース防止(古い接続のcloseイベント遅延中の二重予約を拒否)
+    if (slotConn && slotConn !== conn) {
+      try { conn.send(JSON.stringify({t:'busy'})); } catch(e){}
+      setTimeout(() => { try { conn.close(); } catch(e){} }, 500);
+      return;
+    }
+
+    // 予約: この接続が受信枠を占有。開始されなければ期限で解放
+    slotConn = conn;
+    senderState = 'claimed';
+    clearTimeout(claimTimer);
+    claimTimer = setTimeout(() => {
+      if (senderState === 'claimed') {
+        try { if (conn.open) conn.close(); } catch(e){}
+        releaseSlot();
+        sStep(2, 'active', '相手の接続を待っています', '相手が応答しなかったため、別の接続を待っています。');
+        $('sStat').textContent = '相手が応答しなかったため、別の接続を待っています…';
       }
-      if (!curFile || !curKey || !curSid) return;
+    }, CLAIM_TIMEOUT);
 
-      // 予約: この接続が受信枠を占有。開始されなければ期限で解放
-      slotConn = conn;
-      senderState = 'claimed';
-      clearTimeout(claimTimer);
-      claimTimer = setTimeout(() => {
-        if (senderState === 'claimed') {
-          try { if (conn.open) conn.close(); } catch(e){}
-          releaseSlot();
-          sStep(2, 'active', '相手の接続を待っています', '相手が応答しなかったため、別の接続を待っています。');
-          $('sStat').textContent = '相手が応答しなかったため、別の接続を待っています…';
-        }
-      }, CLAIM_TIMEOUT);
+    $('sStat').textContent = '相手が接続しました。相手の操作を待っています…';
+    sStep(2, 'done', '相手と接続しました', 'ファイル転送を開始できます。');
+    sStep(3, 'wait', 'ファイル転送', '相手がダウンロードを開始すると転送します。');
+    await sendMetaTo(conn);
+  } catch (e) { /* close側で処理 */ }
+}
 
-      $('sStat').textContent = '相手が接続しました。相手の操作を待っています…';
-      sStep(2, 'done', '相手と接続しました', 'ファイル転送を開始できます。');
-      sStep(3, 'wait', 'ファイル転送', '相手がダウンロードを開始すると転送します。');
-      await sendMetaTo(conn);
-    } catch (e) { /* close側で処理 */ }
+function onSenderConn(conn) {
+  /* PINメッセージの待機タイマー: 応答がなければ切断 */
+  conn.on('open', () => {
+    conn.__pinTimer = setTimeout(() => {
+      try { conn.send(JSON.stringify({t:'ended'})); } catch(e){}
+      setTimeout(() => { try { conn.close(); } catch(e){} }, 300);
+    }, PIN_TIMEOUT);
   });
 
   conn.on('data', d => {
     const m = parseMsg(d);
-    if (!m || !curFile) return;
+    if (!m) return;
+
+    /* --- PIN検証: リンクを知らない第三者の受信枠乗っ取りを防止 --- */
+    if (m.t === 'pin') {
+      clearTimeout(conn.__pinTimer);
+      if (!curPinHash || m.p === curPinHash) {
+        acceptConn(conn);
+      } else {
+        try { conn.send(JSON.stringify({t:'ended'})); } catch(e){}
+        setTimeout(() => { try { conn.close(); } catch(e){} }, 300);
+      }
+      return;
+    }
+
+    if (!curFile) return;
 
     if (m.t === 'start') {
       // セッションIDの一致とオフセット整合を検証(別ファイル・別セッションへの切替を防止)
@@ -984,9 +1132,10 @@ function onSenderConn(conn) {
   });
 
   conn.on('close', () => {
+    clearTimeout(conn.__pinTimer);
     if (conn === slotConn) {
       clearTimeout(ackTimer);
-      // 古い接続を解放。新しい接続はopenハンドラで再予約され、
+      // 古い接続を解放。新しい接続はpin検証+openハンドラで再予約され、
       // startメッセージのsid+offset検証で同一転送か確認してから再開する。
       slotConn = null;
       if (senderState === 'sending' || senderState === 'waitack') {
@@ -1005,7 +1154,7 @@ async function sendFile(conn, offset) {
   senderState = 'sending';
   sStep(3, 'active', 'ファイルを送信中…');
   const file = curFile, key = curKey, total = file.size, cs = curChunk;
-  const report = makeProgress(info => {
+  const report = makeProgress($('sBar'), info => {
     $('sBar').style.width = info.percent + '%';
     $('sPct').textContent = info.percent + '%';
     $('sSizes').textContent = fmtSize(info.done) + ' / ' + fmtSize(info.total) + (info.rate ? ' ・ ' + fmtSize(info.rate) + '/秒' : '');
@@ -1016,8 +1165,8 @@ async function sendFile(conn, offset) {
   const fileLabel = curFiles.length > 1 ? '(' + (curIdx + 1) + '/' + curFiles.length + '件目) ' : '';
   let pos = offset;
   const t0 = Date.now(), base = offset;
-  // バックプレッシャー: 受信側からのflow確認で送信を制御(実際の受信はonSenderConnのdataハンドラ)
-  let unacked = 0;
+  // バックプレッシャー: 受信側からのflow確認で送信を制御(バイト基準ウィンドウ)
+  let windowBytes = 0;
   const waitFlow = () => new Promise(r => { flowResolve = r; });
   try {
     while (pos < total) {
@@ -1035,14 +1184,15 @@ async function sendFile(conn, offset) {
       if (!conn.open) throw new Error('closed');
       conn.send(packet);
       pos += buf.byteLength;
-      unacked++;
-      // ウィンドウ上限に達したら受信側の処理確認(flow)を待つ
-      if (unacked >= FLOW_WINDOW) {
+      windowBytes += packet.byteLength;
+      // ウィンドウ上限(バイト基準)に達したら受信側の処理確認(flow)を待つ
+      if (windowBytes >= FLOW_WINDOW_BYTES) {
         const waitTimer = setTimeout(() => {
           if (flowResolve) { const r = flowResolve; flowResolve = null; r(); } // 確認紛失時は再開(受信側の検証で最終的に担保)
         }, 15000);
         await waitFlow();
         clearTimeout(waitTimer);
+        windowBytes = 0;
       }
       $('sBar').style.width = (pos / total * 100) + '%';
       report(fileLabel + '送信中', pos, total, base, t0, pos === total);
@@ -1082,6 +1232,7 @@ function onAck() {
       $('sSize').textContent = fmtSize(curFile.size) + ' · ' + typeLabel(curFile.type);
       $('sCheck').classList.add('hidden');
       $('sBar').style.width = '0';
+      $('sBar').parentElement.setAttribute('aria-valuenow', '0');
       $('sStat').textContent = (curIdx + 1) + '/' + curFiles.length + ' 件目「' + curFile.name + '」— 相手の操作を待っています…';
       sStep(3, 'wait', 'ファイル転送', '次のファイルのダウンロード開始を待っています。');
       senderState = 'claimed';
@@ -1092,7 +1243,7 @@ function onAck() {
   $('sStat').innerHTML = '<span class="ok">受信側での検証・保存が完了しました</span>';
   $('sDoneMsg').textContent = curFiles.length > 1 ? 'すべてのファイル (' + curFiles.length + '件) の転送が完了しました' : 'ファイルの転送が完了しました';
   $('sDone').classList.remove('hidden');
-  sStep(3, 'done', '転送が完了しました', '受信側での検証・保存が完了しました。');
+  sStep(3, 'done', '転送が完了しました', '受信側での検証・保存が完了しました。', '転送完了');
   $('sCheck').classList.remove('hidden');
   if (maxRecv && recvDone >= maxRecv) {
     const p = peer;
@@ -1108,32 +1259,59 @@ function stopShare(msg) {
   senderState = 'closed';
   if (peer) { try { peer.destroy(); } catch(e){} peer = null; }
   slotConn = null; opened = false; ended = true;
-  // 鍵とセッション情報への参照を解放(共有終了後は復号不可能に)
-  curKey = null; curSid = null; flowResolve = null;
+  // 鍵・PIN・セッション情報への参照を解放(共有終了後は復号不可能に)
+  curKey = null; curSid = null; curPin = null; curPinHash = null; flowResolve = null;
   $('expire').textContent = '';
   $('link').value = '';
   clearShareQR();
   $('sDone').classList.add('hidden');
   $('sStat').innerHTML = '<b>' + esc(msg || '共有を終了しました。') + '</b>';
-  $('stop').textContent = '新しいファイルを共有';
+  clearTimeout($('stop').__t);
+  $('stop').classList.remove('danger');
+  $('stopLabel').textContent = '新しいファイルを共有';
 }
 function resetSender() {
   ended = false; curFile = null; curKey = null; curSid = null; slotConn = null; recvDone = 0;
+  curPin = null; curPinHash = null;
   curFiles = []; curIdx = 0; pendingFiles = [];
   renderFileList();
   senderState = 'idle';
   fileInput.value = '';
   $('sBar').style.width = '0';
+  $('sBar').parentElement.setAttribute('aria-valuenow', '0');
   $('sPct').textContent = '0%';
   $('sSizes').textContent = '';
   $('sCheck').classList.add('hidden');
   $('sDone').classList.add('hidden');
   $('sStat').textContent = '';
-  $('stop').textContent = '共有をやめる';
+  clearTimeout($('stop').__t);
+  $('stop').classList.remove('danger');
+  $('stopLabel').textContent = '共有を終了';
   $('shareCard').classList.add('hidden');
   $('setupView').classList.remove('hidden');
 }
-$('stop').onclick = () => { if (ended) resetSender(); else stopShare(); };
+function resetStopBtn(){
+  const b = $('stop');
+  b.classList.remove('danger');
+  clearTimeout(b.__t);
+  if (ended) $('stopLabel').textContent = '新しいファイルを共有';
+  else $('stopLabel').textContent = '共有を終了';
+}
+$('stop').onclick = () => {
+  if (ended) { resetSender(); return; }
+  const b = $('stop');
+  if (!b.classList.contains('danger')) {
+    // 1回目: 確認状態へ(誤タップ防止)。3秒で元に戻る
+    b.classList.add('danger');
+    $('stopLabel').textContent = '本当に終了しますか?';
+    clearTimeout(b.__t);
+    b.__t = setTimeout(resetStopBtn, 3000);
+    return;
+  }
+  // 2回目: 実行
+  clearTimeout(b.__t);
+  stopShare();
+};
 /* ---------- QR拡大表示(ライトボックス) ---------- */
 let qrLastFocus = null;
 function openQrOverlay(dataUri) {
@@ -1156,8 +1334,14 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeQrOverl
 $('copy').onclick = async () => {
   try { await navigator.clipboard.writeText($('link').value); }
   catch(e){ $('link').select(); document.execCommand('copy'); }
-  $('copy').textContent = 'コピーしました';
-  setTimeout(() => $('copy').textContent = 'コピー', 1500);
+  const b = $('copy');
+  b.classList.add('copied');
+  b.querySelector('span').textContent = 'コピーしました';
+  clearTimeout(b.__t);
+  b.__t = setTimeout(() => {
+    b.classList.remove('copied');
+    b.querySelector('span').textContent = 'コピー';
+  }, 1500);
 };
 
 /* ================= 受信側 ================= */
@@ -1168,12 +1352,20 @@ async function initReceiver() {
   $('recvView').classList.remove('hidden');
   $('recvView').appendChild($('safe'));
 
-  const [pid, keyStr] = location.hash.slice(1).split('.');
+  const parts = location.hash.slice(1).split('.');
+  const pid = parts[0], keyStr = parts[1], pin = parts[2] || '';
   if (!pid || !keyStr) { setStepError(1, 'URLが正しくありません。'); return; }
 
   let key;
   try { key = await crypto.subtle.importKey('raw', unb64u(keyStr), 'AES-GCM', false, ['decrypt']); }
   catch(e) { setStepError(1, 'URLの鍵が正しくありません。'); return; }
+
+  // PIN(URLの3番目の要素): 送信者側のPIN検証に使うSHA-256ハッシュを計算
+  let pinHash = '';
+  if (pin) {
+    try { pinHash = await sha256Hex(pin); }
+    catch(e) { setStepError(1, 'URLのPINが正しくありません。'); return; }
+  }
 
   function setBadge(i, cls, text) {
     const b = $('rb' + i);
@@ -1216,9 +1408,9 @@ async function initReceiver() {
   let processedSinceFlow = 0;         // 前回のflow送信以降に処理したチャンク数
   let invalidCount = 0;               // 不正メッセージ連続カウンタ(レート制限)
   let lastChunkAt = 0, t0 = 0, base = 0;
-  const memCap = memoryCap();
+  const memCap = await memoryCap();
   const timers = [];
-  const report = makeProgress(info => {
+  const report = makeProgress($('rBar'), info => {
     $('rBar').style.width = info.percent + '%';
     $('rPct').textContent = info.percent + '%';
     $('rSizes').textContent = fmtSize(info.done) + ' / ' + fmtSize(info.total);
@@ -1228,7 +1420,12 @@ async function initReceiver() {
   const later = (fn, ms) => { const t = setTimeout(fn, ms); timers.push(t); return t; };
   const clearTimers = () => { timers.forEach(clearTimeout); timers.length = 0; };
 
-  const rpeer = new Peer();
+  /* 受信中の離脱確認 */
+  window.addEventListener('beforeunload', ev => {
+    if (started && !finished && !failed) { ev.preventDefault(); ev.returnValue = ''; }
+  });
+
+  const rpeer = new Peer(peerOptions());
   later(() => {
     if (!meta) {
       setStepError(1, '送信者が見つかりません');
@@ -1277,7 +1474,8 @@ async function initReceiver() {
     $('dl').classList.add('hidden');
     $('actionArea').classList.add('hidden');
     $('rState').textContent = 'このタブを閉じないでください。';
-    conn.send(JSON.stringify({t:'start', offset: received, sid: sid}));
+    try { conn.send(JSON.stringify({t:'start', offset: received, sid: sid})); }
+    catch(e) { tryReconnect(); }
   }
 
   async function onMeta(m) {
@@ -1301,7 +1499,7 @@ async function initReceiver() {
       sid = info.sid;
       chunkSize = info.chunk;
 
-      // 保存先API未対応環境では安全サイズを上限に拒否(③メモリ制御)
+      // 保存先API未対応環境では安全サイズを上限に拒否(メモリ制御)
       if (meta.size > memCap) {
         throw verr('このブラウザでは約' + fmtSize(memCap) + 'を超えるファイルは安全に受信できません。PCのChrome/Edgeをお使いください。');
       }
@@ -1329,6 +1527,7 @@ async function initReceiver() {
       $('rSize').textContent = fmtSize(meta.size) + ' · ' + typeLabel(meta.type);
       $('rCheck').classList.add('hidden');
       $('rBar').style.width = '0';
+      $('rBar').parentElement.setAttribute('aria-valuenow', '0');
       $('rPct').textContent = '0%';
       $('rStat').textContent = '';
       $('rEta').textContent = '';
@@ -1346,7 +1545,7 @@ async function initReceiver() {
       setBadge(3, '', '待機中');
       updateStepLabel(3, 'ファイルを受信中…');
     } else {
-      // 再接続: 同一転送であることの検証(②整合性)
+      // 再接続: 同一転送であることの検証(整合性)
       if (meta.size !== info.size || chunkSize !== info.chunk) {
         throw verr('再接続先のファイルが元の転送と一致しません。');
       }
@@ -1396,6 +1595,7 @@ async function initReceiver() {
     setStepDone(3);
     updateStepLabel(3, '受信・検証が完了しました');
     $('rBar').style.width = '100%';
+    $('rBar').parentElement.setAttribute('aria-valuenow', '100');
     $('rPct').textContent = '100%';
     $('rStat').textContent = '';
     $('rEta').textContent = '';
@@ -1426,7 +1626,7 @@ async function initReceiver() {
         } else if (m.t === 'busy') {
           setStepError(2, '送信者は別の相手に送信中です。少し待ってからやり直してください。');
         } else if (m.t === 'ended') {
-          fail('送信者が共有を終了しました。');
+          fail('送信者が共有を終了したか、PINが一致しません。リンクとPINをご確認ください。');
         } else if (m.t === 'fail') {
           fail('送信者側でエラーが発生しました。もう一度やり直してください。');
         } else if (m.t === 'done') {
@@ -1456,6 +1656,12 @@ async function initReceiver() {
   function connect() {
     conn = rpeer.connect(pid, {reliable: true, serialization: 'raw'});
     const c = conn;
+    c.on('open', () => {
+      // PIN検証のため接続開始直後にPINハッシュを送信(送信者はこれを検証してから受信枠を割り当てる)
+      if (pinHash) {
+        try { c.send(JSON.stringify({t:'pin', p: pinHash})); } catch(e){}
+      }
+    });
     c.on('data', onData);
     c.on('error', () => {});
     c.on('close', () => {
